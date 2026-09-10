@@ -57,3 +57,6 @@ Thumbs.db
 !.env.example
 
 *.json
+*.jpeg
+*.jpg
+*.png
