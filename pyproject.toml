@@ -1,0 +1,8 @@
+[project]
+name = "music-dl"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "request",
+    "yt-dlp>=2026.8.19",
+]

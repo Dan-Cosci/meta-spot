@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+build/
+dist/
+.eggs/
+wheels/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# uv
+.uv/
+
+# Downloaded media (adjust as needed)
+*.mp3
+*.m4a
+*.opus
+*.ogg
+*.flac
+*.wav
+*.aac
+*.webm
+*.mp4
+*.mkv
+*.part
+*.temp
+
+# yt-dlp / ffmpeg intermediates
+*.ytdl
+*.info.json
+*.description
+*.annotations.xml
+*.tmp
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env / config
+.env
+.env.*
+!.env.example
