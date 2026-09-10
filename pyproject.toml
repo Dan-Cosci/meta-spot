@@ -3,6 +3,8 @@ name = "music-dl"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
-    "request",
+    "ffmpeg-python>=0.2.0",
+    "python-dotenv>=1.2.3",
+    "requests>=2.34.2",
     "yt-dlp>=2026.8.19",
 ]
