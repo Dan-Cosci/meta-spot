@@ -5,6 +5,7 @@ from yt_dlp import  YoutubeDL
 import requests
 import os
 from dotenv import load_dotenv
+import subprocess
 
 # env loader
 load_dotenv(".env.local")
@@ -63,3 +64,6 @@ params = {
 with open("out.json", "w") as file:
     data = requests.get(spotify_api+"search", params=params, headers={"Authorization": f"Bearer {get_token()}"}).json()
     json.dump(data, file, indent=2)
+
+
+subprocess.run(["ffmpeg","--version"])
