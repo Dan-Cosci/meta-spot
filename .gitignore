@@ -56,7 +56,14 @@ Thumbs.db
 .env.*
 !.env.example
 
+# extensions
 *.json
 *.jpeg
 *.jpg
 *.png
+*.txt
+
+# folders
+que/
+jobs/
+finished/

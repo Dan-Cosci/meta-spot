@@ -6,8 +6,8 @@ from .ffmpeg_service import (
     tag_with_cover,
 )
 from .file_service import (
-    write_json,
-    read_json,
+    write_file,
+    read_file,
     rename_file,
     clean_job,
 )

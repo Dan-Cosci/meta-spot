@@ -1,12 +1,12 @@
 import json
 from pathlib import Path
 
-def write_json(base: Path, file_name: str, data) -> Path:
+def write_file(base: Path, file_name: str, data) -> Path:
     path = Path(base, file_name)
-    path.write_text(json.dumps(data, indent=4))
+    path.write_text(data)
     return path
 
-def read_json(base: Path, file_name: str) -> dict:
+def read_file(base: Path, file_name: str) -> dict:
     path = Path(base, file_name)
     data = json.loads(path.read_text())
     return data
