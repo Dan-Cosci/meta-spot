@@ -1,11 +1,12 @@
 from datetime import datetime
 import requests
 import json
-from src.core import *
+from core import spotify
+from pathlib import Path
 
 def get_token():
 
-    if os.path.exists("token.json"):
+    if Path("token.json").exists():
         with open("token.json","r") as file:
             cur = json.load(file)
             if datetime.now().timestamp() < cur["expires_at"]:
@@ -13,10 +14,11 @@ def get_token():
 
     data = {
         "grant_type": "client_credentials",
-        "client_id": client,
-        "client_secret": secret,
+        "client_id": spotify["client_id"],
+        "client_secret": spotify["client_secret"],
     }
-    res = requests.post(token_api, data=data).json()
+
+    res = requests.post(spotify["token_api"], data=data).json()
     res["expires_at"] = datetime.now().timestamp() + res["expires_in"]
     with open("token.json", "w") as file: json.dump(res, file, indent=2)
 

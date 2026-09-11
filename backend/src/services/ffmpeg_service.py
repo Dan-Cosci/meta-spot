@@ -1,6 +1,5 @@
 import json
 import subprocess
-import os
 
 
 def load_spotify_track(out_json_path: str):
@@ -59,6 +58,3 @@ def tag_with_cover(input_audio: str, output_audio: str, track: dict, cover: str 
     ]
     subprocess.run(cmd, check=True)
     return output_audio
-
-def clean_job(path):
-    os.remove(path)
