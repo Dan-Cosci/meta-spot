@@ -18,7 +18,7 @@ async def create_job(req: job_req):
         job_id=id,
         song=req.song
     )
-    write_file(base=QUE_DIR, file_name=f"{id}.json", data=job.model_dump_json())
+    write_file(base=QUE_DIR, file_name=f"{id}", data=job.model_dump_json())
     return {
         "success": True,
         "Message": "Hello from fastapi",

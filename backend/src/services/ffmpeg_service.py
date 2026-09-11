@@ -1,25 +1,12 @@
-import json
 import subprocess
+from pathlib import Path
 
 
-def load_spotify_track(out_json_path: str):
-    with open(out_json_path, "r") as f:
-        data = json.load(f)
+def clean_spotify_data(data: dict):
     return data["tracks"]["items"][0]
 
 def format_song(track: dict):
     return f"{track["album"]["artists"][0]["name"]} - {track["name"]}"
-
-def download_cover(track: dict, dest: str = "img.jpg") -> str:
-    """Download the highest-resolution album art and save it."""
-    import requests
-    url = track["album"]["images"][0]["url"]
-    r = requests.get(url)
-    r.raise_for_status()
-    with open(dest, "wb") as f:
-        f.write(r.content)
-    return dest
-
 
 def build_metadata(track: dict):
     """Convert Spotify track data into repeated ffmpeg -metadata args."""
@@ -40,7 +27,7 @@ def build_metadata(track: dict):
     ]
 
 
-def tag_with_cover(input_audio: str, output_audio: str, track: dict, cover: str = "img.jpg"):
+def tag_with_cover(input_audio: str | Path, output_audio: str | Path, track: dict, cover: str| Path):
     """Combine audio + cover art + metadata into a finished MP3."""
     cmd = [
         "ffmpeg", "-y",

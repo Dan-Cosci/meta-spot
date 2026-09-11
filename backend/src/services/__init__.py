@@ -1,7 +1,5 @@
 from .ffmpeg_service import (
-    load_spotify_track,
     format_song,
-    download_cover,
     build_metadata,
     tag_with_cover,
 )

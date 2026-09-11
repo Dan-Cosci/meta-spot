@@ -4,6 +4,8 @@ import json
 from core import spotify
 from pathlib import Path
 
+from services.file_service import write_file, write_img
+
 def get_token():
 
     if Path("token.json").exists():
@@ -24,3 +26,16 @@ def get_token():
 
     print("Requested new access token")
     return res["access_token"]
+
+def get_metadata(job_file:dict):
+    params = {
+        "q": f"{job_file["song"]}",
+        "type" : "track",
+        "limit": 1
+    }
+    return requests.get(spotify["api"]+"search", params=params, headers={"Authorization": f"Bearer {get_token()}"}).json()
+
+def get_music_cover(track_data: dict, file_name: Path, base: Path) -> Path:
+    url = track_data["album"]["images"][0]["url"]
+    r = requests.get(url)
+    return write_img(base=base, file_name=file_name, data=r.content)
