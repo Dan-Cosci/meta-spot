@@ -11,5 +11,6 @@ spotify = {
 }
 
 api = {
-
+    "port": int(str(os.getenv("port"))),
+    "host": str(os.getenv("host"))
 }
