@@ -5,11 +5,8 @@ from pathlib import Path
 
 
 from services import (
-    get_token,
-    build_metadata,
     tag_with_cover,
     format_song,
-    clean_job,
     download_mp3,
     get_metadata,
     get_music_cover,
@@ -18,7 +15,7 @@ from services import (
     rename_file,
 )
 
-from core import spotify, FINISHED_DIR, JOBS_DIR, QUE_DIR
+from core import FINISHED_DIR, JOBS_DIR, QUE_DIR
 
 print("running worker process")
 
