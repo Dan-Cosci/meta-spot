@@ -1,6 +1,6 @@
 from yt_dlp import YoutubeDL
 
-from core.files import JOBS_DIR
+from core import JOBS_DIR
 
 
 def download_mp3(job_file: dict):
@@ -13,7 +13,9 @@ def download_mp3(job_file: dict):
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
             'preferredquality': '192',
+
         }],
         "outtmpl": f"{JOBS_DIR}/{job_id}.%(ext)s",
+        "retries": 3
     }) as ydl:
         ydl.download(f"ytsearch1:{song} lyrics")

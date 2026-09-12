@@ -10,14 +10,15 @@ from services import (
     tag_with_cover,
     format_song,
     clean_job,
+    download_mp3,
+    get_metadata,
+    get_music_cover,
+    clean_spotify_data,
+    read_file,
+    rename_file,
 )
 
-from core import spotify
-from services.yt_service import download_mp3
-from core.files import FINISHED_DIR, JOBS_DIR, QUE_DIR
-from services.file_service import read_file, rename_file
-from services.spotify_service import get_metadata, get_music_cover
-from services.ffmpeg_service import clean_spotify_data
+from core import spotify, FINISHED_DIR, JOBS_DIR, QUE_DIR
 
 print("running worker process")
 
@@ -42,18 +43,26 @@ while True:
         print("waiting for jobs...")
         sleep(2)
         continue
-    print(job_name)
-    job_file = read_file(JOBS_DIR, job_name)
-    download_mp3(job_file)
-    spotify_raw = get_metadata(job_file)
-    spotify_data = clean_spotify_data(spotify_raw)
 
-    song_name= format_song(spotify_data)
-    art = get_music_cover(base=JOBS_DIR, file_name=job_name, track_data=spotify_data)
-    tag_with_cover(
-        cover=art,
-        input_audio=Path(JOBS_DIR, f"{job_name}.mp3"),
-        track=spotify_data,
-        output_audio=Path(FINISHED_DIR, f"{song_name}.mp3")
-    )
-    job_name = None
+    for i in range(3):
+        try:
+            print(job_name)
+            job_file = read_file(JOBS_DIR, job_name)
+            download_mp3(job_file)
+            spotify_raw = get_metadata(job_file)
+            spotify_data = clean_spotify_data(spotify_raw)
+
+            song_name= format_song(spotify_data)
+            art = get_music_cover(base=JOBS_DIR, file_name=job_name, track_data=spotify_data)
+            tag_with_cover(
+                cover=art,
+                input_audio=Path(JOBS_DIR, f"{job_name}.mp3"),
+                track=spotify_data,
+                output_audio=Path(FINISHED_DIR, f"{song_name}.mp3")
+            )
+            job_name = None
+            break
+        except Exception:
+            print(f"failed downaload: {job_name}, attempt: {i+1}")
+            sleep(1)
+            continue

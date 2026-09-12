@@ -7,3 +7,14 @@ from .files import (
     JOBS_DIR,
     FINISHED_DIR,
 )
+
+__all__ = [
+    "spotify",
+    "api",
+    "BASE_DIR",
+    "SRC_DIR",
+    "TEMP_DIR",
+    "QUE_DIR",
+    "JOBS_DIR",
+    "FINISHED_DIR",
+]
