@@ -57,11 +57,11 @@ Thumbs.db
 !.env.example
 
 # extensions
-*.json
 *.jpeg
 *.jpg
 *.png
 *.txt
+.token
 
 # folders
 que/
