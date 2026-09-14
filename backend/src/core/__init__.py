@@ -1,4 +1,4 @@
-from .config import spotify, api
+from .config import spotify_settings, api_settings
 from .files import (
     BASE_DIR,
     SRC_DIR,
@@ -9,8 +9,8 @@ from .files import (
 )
 
 __all__ = [
-    "spotify",
-    "api",
+    "spotify_settings",
+    "api_settings",
     "BASE_DIR",
     "SRC_DIR",
     "TEMP_DIR",

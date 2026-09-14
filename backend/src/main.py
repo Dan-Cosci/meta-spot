@@ -1,13 +1,42 @@
 
+from contextlib import asynccontextmanager
+from pathlib import Path
+from queue import Queue
+import threading
 from uuid import uuid4
 
 from fastapi import FastAPI, Request
-from core import api, QUE_DIR
-from models import job_req, job_return
+from fastapi.responses import FileResponse
+
+from core import FINISHED_DIR, QUE_DIR, api_settings
+from models import JOB_QUE, JOB_REQUEST, JOB_RESPONSE
 from services import write_file
+from worker import worker
 
+PROCESS_QUE: Queue = Queue()
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("process start")
+
+    stop = threading.Event()
+    t = [
+        threading.Thread(target=worker, args=(i, PROCESS_QUE, stop), name=f"worker: {i}")
+        for i in range(3)
+    ]
+
+    for i in t:
+        i.start()
+
+    yield
+
+    stop.set()
+    for i in t:
+        i.join(timeout=30)
+
+    print("process ended")
+
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/job/{job_id}")
 async def get_job_details(job_id):
@@ -17,17 +46,14 @@ async def get_job_details(job_id):
         "data": job_id
     }
 
-
-
-
 @app.post("/job")
-async def create_job(req: job_req):
+async def create_job(req: JOB_REQUEST):
     id = uuid4()
-    job = job_return(
+    job = JOB_RESPONSE(
         job_id=id,
         song=req.song
     )
-    write_file(base=QUE_DIR, file_name=f"{id}", data=job.model_dump_json())
+    PROCESS_QUE.put(job)
     return {
         "success": True,
         "Message": "Created request",
@@ -36,17 +62,18 @@ async def create_job(req: job_req):
 
 
 @app.post("/job/bulk")
-async def bulk_create_job(req: list[job_req]):
+async def bulk_create_job(req: list[JOB_REQUEST]):
 
     jobs = []
     for i in req:
         id = uuid4()
-        job = job_return(
+        job = JOB_RESPONSE(
             job_id=id,
             song=i.song
         )
-        write_file(base=QUE_DIR, file_name=f"{id}", data=job.model_dump_json())
         jobs.append(job)
+
+    for i in jobs: PROCESS_QUE.put(i)
 
     return {
         "success": True,
@@ -54,12 +81,21 @@ async def bulk_create_job(req: list[job_req]):
         "data": jobs
     }
 
+@app.get("/download/{job_id}")
+async def download_file(job_id):
+    print(job_id)
+    return FileResponse(
+        path=f"{Path(FINISHED_DIR/ "Adele - Hello.mp3")}",
+        filename="test",
+        content_disposition_type="inline"
+    )
+
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app",
-        port=api["port"],
-        host=api["host"],
+        port=api_settings["port"],
+        host=api_settings["host"],
         reload=True,
         use_colors=True
     )

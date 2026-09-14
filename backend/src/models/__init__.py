@@ -1,6 +1,8 @@
-from .schemas import job_req, job_return
+from .schemas import JOB_REQUEST, JOB_RESPONSE,JOB_QUE,JOB_STATUS
 
 __all__ = [
-    "job_req",
-    "job_return",
+    "JOB_REQUEST",
+    "JOB_RESPONSE",
+    "JOB_QUE",
+    "JOB_STATUS",
 ]

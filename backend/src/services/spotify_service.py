@@ -1,7 +1,7 @@
 from datetime import datetime
 import requests
 import json
-from core import spotify
+from core import spotify_settings
 from pathlib import Path
 
 from services.file_service import write_file, write_img
@@ -16,11 +16,11 @@ def get_token():
 
     data = {
         "grant_type": "client_credentials",
-        "client_id": spotify["client_id"],
-        "client_secret": spotify["client_secret"],
+        "client_id": spotify_settings["client_id"],
+        "client_secret": spotify_settings["client_secret"],
     }
 
-    res = requests.post(spotify["token_api"], data=data).json()
+    res = requests.post(spotify_settings["token_api"], data=data).json()
     res["expires_at"] = datetime.now().timestamp() + res["expires_in"]
     with open("token.json", "w") as file: json.dump(res, file, indent=2)
 
@@ -33,7 +33,7 @@ def get_metadata(job_file:dict):
         "type" : "track",
         "limit": 1
     }
-    return requests.get(spotify["api"]+"search", params=params, headers={"Authorization": f"Bearer {get_token()}"}).json()
+    return requests.get(spotify_settings["api"]+"search", params=params, headers={"Authorization": f"Bearer {get_token()}"}).json()
 
 def get_music_cover(track_data: dict, file_name: Path, base: Path) -> Path:
     url = track_data["album"]["images"][0]["url"]

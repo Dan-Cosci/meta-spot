@@ -13,9 +13,9 @@ def read_file(base: Path, file_name: str) -> dict:
     data = json.loads(path.read_text())
     return data
 
-def rename_file(base: Path, file_name: str, new_file_name: str, base2=None) -> Path:
+def rename_file(base: Path, file_name: str, new_file_name: str, to=None) -> Path:
     file = Path(base, file_name)
-    new_file = Path(base2, new_file_name) if base2 else Path(base, new_file_name)
+    new_file = Path(to, new_file_name) if to else Path(base, new_file_name)
     return file.rename(new_file)
 
 def write_img(base: Path, file_name: str | Path, data) -> Path:

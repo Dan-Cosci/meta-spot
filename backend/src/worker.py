@@ -1,10 +1,10 @@
-import json
+from queue import Queue
+import threading
 from time import sleep
-import requests
 from pathlib import Path
 
-
 from services import (
+    clean_job,
     tag_with_cover,
     format_song,
     download_mp3,
@@ -18,51 +18,41 @@ from services import (
 
 from core import FINISHED_DIR, JOBS_DIR, QUE_DIR, TEMP_DIR
 
-print("running worker process")
 
-while True:
-    job_name = None
-    check_dirs()
+def process_job():
+    pass
 
-    for i in QUE_DIR.iterdir():
-        print(i)
+def worker(id: int, q: Queue, stop: threading.Event):
+    while not stop.is_set():
         try:
-            file = rename_file(
-                base=QUE_DIR,
-                file_name=i.name,
-                new_file_name=i.name,
-                base2=JOBS_DIR
-            )
-
-            job_name = file.name
-            break
-        except FileNotFoundError:
+            task = q.get(timeout=1.0)
+            print(task)
+        except:
             continue
 
-    if not job_name:
-        print("waiting for jobs...")
-        sleep(2)
-        continue
+        for i in range(3):
 
-    for i in range(3):
-        try:
-            print(job_name)
-            job_file = read_file(JOBS_DIR, job_name)
-            download_mp3(job_file)
-            spotify_raw = get_metadata(job_file)
-            spotify_data = clean_spotify_data(spotify_raw)
+            job_name = str(task.job_id)
+            try:
+                download_mp3(task)
+                spotify_raw = get_metadata(task)
+                spotify_data = clean_spotify_data(spotify_raw)
 
-            song_name= format_song(spotify_data)
-            art = get_music_cover(base=JOBS_DIR, file_name=job_name, track_data=spotify_data)
-            tag_with_cover(
-                cover=art,
-                input_audio=Path(JOBS_DIR, f"{job_name}.mp3"),
-                track=spotify_data,
-                output_audio=Path(FINISHED_DIR, f"{song_name}.mp3")
-            )
-            job_name = None
-            break
-        except Exception:
-            print(f"failed downaload: {job_name}, attempt: {i+1}")
-            sleep(1)
-            continue
+                song_name= format_song(spotify_data)
+                art = get_music_cover(base=JOBS_DIR, file_name=job_name, track_data=spotify_data)
+                tag_with_cover(
+                    cover=art,
+                    input_audio=Path(JOBS_DIR, f"{job_name}.mp3"),
+                    track=spotify_data,
+                    output_audio=Path(FINISHED_DIR, f"{song_name}.mp3")
+                )
+
+                for i in JOBS_DIR.glob(f"{job_name}.*"):
+                    clean_job(Path(JOBS_DIR,i))
+
+                clean_job(Path(JOBS_DIR,job_name))
+                break
+            except Exception:
+                print(f"failed downaload: {job_name}, attempt: {i+1}")
+                sleep(1)
+                continue
