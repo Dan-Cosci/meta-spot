@@ -9,6 +9,7 @@ from .file_service import (
     read_file,
     rename_file,
     write_img,
+    check_dirs,
     clean_job,
 )
 from .spotify_service import (

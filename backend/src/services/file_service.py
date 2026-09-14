@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+from core import TEMP_DIR, JOBS_DIR, FINISHED_DIR, QUE_DIR
+
 def write_file(base: Path, file_name: str, data) -> Path:
     path = Path(base, file_name)
     path.write_text(data)
@@ -21,6 +23,11 @@ def write_img(base: Path, file_name: str | Path, data) -> Path:
     path.write_bytes(data)
     return path
 
+def check_dirs() -> None:
+    if not TEMP_DIR.exists(): Path.mkdir(TEMP_DIR)
+    if not JOBS_DIR.exists(): Path.mkdir(JOBS_DIR)
+    if not FINISHED_DIR.exists(): Path.mkdir(FINISHED_DIR)
+    if not QUE_DIR.exists(): Path.mkdir(QUE_DIR)
 
 def clean_job(path):
     """Remove a file if it exists (used to clean up interim downloads)."""

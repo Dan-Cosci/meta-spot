@@ -13,14 +13,17 @@ from services import (
     clean_spotify_data,
     read_file,
     rename_file,
+    check_dirs
 )
 
-from core import FINISHED_DIR, JOBS_DIR, QUE_DIR
+from core import FINISHED_DIR, JOBS_DIR, QUE_DIR, TEMP_DIR
 
 print("running worker process")
 
 while True:
     job_name = None
+    check_dirs()
+
     for i in QUE_DIR.iterdir():
         print(i)
         try:

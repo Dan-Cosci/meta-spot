@@ -9,7 +9,7 @@ from services.file_service import write_file, write_img
 def get_token():
 
     if Path(".token").exists():
-        with open("token.json","r") as file:
+        with open(".token","r") as file:
             cur = json.load(file)
             if datetime.now().timestamp() < cur["expires_at"]:
                 return cur["access_token"]
