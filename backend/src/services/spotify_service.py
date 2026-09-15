@@ -5,6 +5,7 @@ from core import spotify_settings
 from pathlib import Path
 
 from services.file_service import write_file, write_img
+from models import JOB_RESPONSE
 
 def get_token():
 
@@ -27,9 +28,9 @@ def get_token():
     print("Requested new access token")
     return res["access_token"]
 
-def get_metadata(job_file:dict):
+def get_metadata(job_file:JOB_RESPONSE):
     params = {
-        "q": f"{job_file["song"]}",
+        "q": f"{job_file.song}",
         "type" : "track",
         "limit": 1
     }

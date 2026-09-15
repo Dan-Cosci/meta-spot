@@ -44,7 +44,7 @@ def worker(id: int, q: Queue, stop: threading.Event):
                     cover=art,
                     input_audio=Path(JOBS_DIR, f"{job_name}.mp3"),
                     track=spotify_data,
-                    output_audio=Path(FINISHED_DIR, f"{song_name}.mp3")
+                    output_audio=Path(FINISHED_DIR, f"{song_name}_{job_name}.mp3")
                 )
 
                 for i in JOBS_DIR.glob(f"{job_name}.*"):
