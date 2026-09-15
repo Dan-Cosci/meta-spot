@@ -6,9 +6,10 @@ import threading
 from uuid import uuid4
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
-from core import FINISHED_DIR, QUE_DIR, api_settings
+from core import FINISHED_DIR, QUE_DIR, api_settings, store
 from models import JOB_QUE, JOB_REQUEST, JOB_RESPONSE
 from services import write_file
 from worker import worker
@@ -37,6 +38,14 @@ async def lifespan(app: FastAPI):
     print("process ended")
 
 app = FastAPI(lifespan=lifespan)
+
+
+app.add_middleware(CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 @app.get("/job/{job_id}")
 async def get_job_details(job_id):
@@ -84,12 +93,20 @@ async def bulk_create_job(req: list[JOB_REQUEST]):
 @app.get("/download/{job_id}")
 async def download_file(job_id):
     print(job_id)
+    file = [i for i in FINISHED_DIR.glob(f"*_{job_id}.mp3")]
+
     return FileResponse(
-        path=f"{Path(FINISHED_DIR/ "Adele - Hello.mp3")}",
-        filename="test",
-        content_disposition_type="inline"
+        path=file[0],
+        filename=str(str(file[0].name).split("_")[0]+ "."+str(file[0].name).split(".")[1]),
+        content_disposition_type="attachment"
     )
 
+@app.get("/status/{job_id}")
+async def job_status(job_id):
+    return {
+        "job_id": job_id,
+        "que" : store.get(job_id)
+    }
 
 if __name__ == "__main__":
     import uvicorn

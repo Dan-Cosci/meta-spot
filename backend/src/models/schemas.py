@@ -1,13 +1,15 @@
 
 from enum import Enum
+from pathlib import Path
 
 from pydantic import BaseModel
 from uuid import UUID
 
 class JOB_STATUS(Enum):
-    pending = 0,
-    processing = 1,
-    done = 3
+    PENDING = "pending",
+    PROCESSING = "processing",
+    DONE = "done",
+    FAILED = "failed"
 
 
 class JOB_REQUEST(BaseModel):
@@ -19,5 +21,6 @@ class JOB_RESPONSE(JOB_REQUEST):
 class JOB_QUE(JOB_RESPONSE):
     status: JOB_STATUS
     file_name: str | None = None
+    file_path: str | Path | None = None
     is_downloaded: bool = False
     finished_at: float | None = None

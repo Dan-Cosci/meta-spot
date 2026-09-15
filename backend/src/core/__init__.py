@@ -7,6 +7,7 @@ from .files import (
     JOBS_DIR,
     FINISHED_DIR,
 )
+from .state import job_store, store
 
 __all__ = [
     "spotify_settings",
@@ -17,4 +18,6 @@ __all__ = [
     "QUE_DIR",
     "JOBS_DIR",
     "FINISHED_DIR",
+    "job_store",
+    "store",
 ]
