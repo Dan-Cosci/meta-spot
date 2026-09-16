@@ -1,7 +1,8 @@
 import json
 from pathlib import Path
 
-from core import TEMP_DIR, JOBS_DIR, FINISHED_DIR, QUE_DIR
+from core import FINISHED_DIR, JOBS_DIR, QUE_DIR, TEMP_DIR
+
 
 def write_file(base: Path, file_name: str, data) -> Path:
     path = Path(base, file_name)

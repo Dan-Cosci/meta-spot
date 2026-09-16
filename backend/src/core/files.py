@@ -1,5 +1,5 @@
-from pathlib import Path
 import os
+from pathlib import Path
 
 BASE_DIR = Path(os.getcwd()).resolve()
 SRC_DIR = BASE_DIR / "src"

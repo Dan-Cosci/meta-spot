@@ -1,17 +1,15 @@
 
-from contextlib import asynccontextmanager
-from pathlib import Path
-from queue import Queue
 import threading
+from contextlib import asynccontextmanager
+from queue import Queue
 from uuid import uuid4
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
-from core import FINISHED_DIR, QUE_DIR, api_settings, store
-from models import JOB_QUE, JOB_REQUEST, JOB_RESPONSE
-from services import write_file
+from core import FINISHED_DIR, api_settings, store
+from models import JOB_REQUEST, JOB_RESPONSE
 from worker import worker
 
 PROCESS_QUE: Queue = Queue()

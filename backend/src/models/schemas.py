@@ -1,9 +1,10 @@
 
 from enum import Enum
 from pathlib import Path
+from uuid import UUID
 
 from pydantic import BaseModel
-from uuid import UUID
+
 
 class JOB_STATUS(Enum):
     PENDING = "pending",

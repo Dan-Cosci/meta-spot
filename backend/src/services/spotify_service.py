@@ -1,11 +1,13 @@
-from datetime import datetime
-import requests
 import json
-from core import spotify_settings
+from datetime import datetime
 from pathlib import Path
 
-from services.file_service import write_file, write_img
+import requests
+
+from core import spotify_settings
 from models import JOB_RESPONSE
+from services.file_service import write_file, write_img
+
 
 def get_token():
 
