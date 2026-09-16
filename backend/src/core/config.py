@@ -18,5 +18,5 @@ api_settings = {
 
 thread_settings = {
     "max_que": int(str(os.getenv("max_que"))),
-    "threads": int(str(os.getenv("threads")))
+    "max_threads": int(str(os.getenv("max_threads")))
 }
