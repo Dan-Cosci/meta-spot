@@ -21,18 +21,18 @@ async def lifespan(app: FastAPI):
     print("process start")
 
     stop = threading.Event()
-    t = [
+    threads = [
         threading.Thread(target=worker, args=(i, PROCESS_QUE, stop), name=f"worker: {i}")
         for i in range(3)
     ]
 
-    for i in t:
+    for i in threads:
         i.start()
 
     yield
 
     stop.set()
-    for i in t:
+    for i in threads:
         i.join(timeout=30)
 
     print("process ended")
@@ -116,6 +116,6 @@ if __name__ == "__main__":
     uvicorn.run("main:app",
         port=api_settings["port"],
         host=api_settings["host"],
-        reload=True,
+        reload=api_settings["env"] == "development",
         use_colors=True
     )

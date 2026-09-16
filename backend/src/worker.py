@@ -1,24 +1,20 @@
-from datetime import datetime
-from queue import Queue
 import threading
-from time import sleep
+from datetime import datetime
 from pathlib import Path
-
-from services import (
-    clean_job,
-    tag_with_cover,
-    format_song,
-    download_mp3,
-    get_metadata,
-    get_music_cover,
-    clean_spotify_data,
-    read_file,
-    rename_file,
-    check_dirs
-)
+from queue import Queue
+from time import sleep
 
 from core import FINISHED_DIR, JOBS_DIR, store
 from models import JOB_STATUS
+from services import (
+    clean_job,
+    clean_spotify_data,
+    download_mp3,
+    format_song,
+    get_metadata,
+    get_music_cover,
+    tag_with_cover,
+)
 
 
 def process_job(task):

@@ -36,7 +36,7 @@ def get_metadata(job_file:JOB_RESPONSE):
     }
     return requests.get(spotify_settings["api"]+"search", params=params, headers={"Authorization": f"Bearer {get_token()}"}).json()
 
-def get_music_cover(track_data: dict, file_name: Path, base: Path) -> Path:
+def get_music_cover(track_data: dict, file_name: Path | str, base: Path) -> Path:
     url = track_data["album"]["images"][0]["url"]
     r = requests.get(url)
     return write_img(base=base, file_name=file_name, data=r.content)
