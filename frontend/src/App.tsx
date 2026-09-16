@@ -20,12 +20,13 @@ export default function App() {
       if (!que) return;
 
       for (const item of que) {
-        if (item.status === "pending") {
+        if (item.status !== "done") {
           const res = await api.get(`/status/${item.job_id}`, {});
-          console.log(res);
+          setQue((prev) => (prev ?? []).map((q) =>
+            q.job_id == item.job_id ? {...q, status: res.data.status[0]}:q
+          ));
         }
       }
-      console.log("I workds");
 
     }, 2000);
 
@@ -45,7 +46,14 @@ export default function App() {
     setQue((prev) => [...(prev ?? []), { query: song, status: "pending", job_id:data.job_id}]);
     setQuery("");
 
+    if (!que) return;
     for (const item of que) console.log(item);
+  }
+
+  const handleDownload = async (job_id: string) => {
+    if (!job_id) return;
+    if (job_id === null) return;
+    window.location.href = `${api.defaults.baseURL}/download/${job_id}`
   }
 
   return (
@@ -120,7 +128,8 @@ export default function App() {
                       }
                       {item.status}
                       {item.status === "done" &&
-                        <button className="ml-4 bg-green-300 text-white font-semibold px-2 py-1 rounded-4xl transition-all duration-150 active:scale-95">
+                        <button className="ml-4 bg-green-300 text-white font-semibold px-2 py-1 rounded-4xl transition-all duration-150 active:scale-95"
+                          onClick={ () => handleDownload(item.job_id) }>
                           Download
                         </button>
                       }

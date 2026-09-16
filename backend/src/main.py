@@ -103,9 +103,12 @@ async def download_file(job_id):
 
 @app.get("/status/{job_id}")
 async def job_status(job_id):
+    job = store.get(job_id)
+    if not job: return {"success": False, "message":"job_id does not exists"}
+
     return {
         "job_id": job_id,
-        "que" : store.get(job_id)
+        "status" : job.status
     }
 
 if __name__ == "__main__":
