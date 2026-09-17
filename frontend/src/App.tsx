@@ -1,4 +1,4 @@
-import { useEffect, useState, SubmitEvent } from "react";
+import { useEffect, useState, type SubmitEvent } from "react";
 import Logo from "./assets/meta-spot-logo.svg"
 import toast from "react-hot-toast";
 import api from "./services/api.service";
@@ -7,7 +7,7 @@ import Footer from "./components/Footer";
 interface Que {
   query: string;
   status: string;
-  job_id: string | null;
+  job_id: string;
 }
 
 export default function App() {
@@ -51,8 +51,7 @@ export default function App() {
   }
 
   const handleDownload = async (job_id: string) => {
-    if (!job_id) return;
-    if (job_id === null) return;
+    if (job_id === "") return;
     window.location.href = `${api.defaults.baseURL}/download/${job_id}`
   }
 
