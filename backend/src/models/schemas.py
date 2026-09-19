@@ -24,4 +24,4 @@ class JOB_QUE(JOB_RESPONSE):
     file_name: str | None = None
     file_path: str | Path | None = None
     is_downloaded: bool = False
-    finished_at: float | None = None
+    downloaded_at: float | None = None

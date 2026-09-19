@@ -31,8 +31,16 @@ class job_store:
             if key in self.jobs:
                 self.jobs[key] = item
 
-    def get(self, job_id):
+    def get(self, job_id) -> JOB_QUE | None:
         with self.lock:
             return self.jobs.get(str(job_id), None)
+
+    def delete(self, job_id):
+        with self.lock:
+            return self.jobs.pop(job_id)
+
+    def list_downloaded(self) -> list:
+        with self.lock:
+            return [key for key,i in self.jobs.items() if i.is_downloaded]
 
 store = job_store()

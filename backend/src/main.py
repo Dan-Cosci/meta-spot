@@ -1,6 +1,7 @@
 
 import threading
 from contextlib import asynccontextmanager
+from datetime import datetime
 from queue import Queue
 from uuid import uuid4
 
@@ -10,18 +11,20 @@ from fastapi.responses import FileResponse
 
 from core import FINISHED_DIR, api_settings, store
 from models import JOB_REQUEST, JOB_RESPONSE
-from worker import worker
+from services import check_dirs
+from worker import delete_worker, worker
 
 PROCESS_QUE: Queue = Queue()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("process start")
+    check_dirs()
 
     stop = threading.Event()
     threads = [
-        threading.Thread(target=worker, args=(i, PROCESS_QUE, stop), name=f"worker: {i}")
-        for i in range(3)
+        *[threading.Thread(target=worker, args=(i, PROCESS_QUE, stop), name=f"worker: {i}") for i in range(3)],
+        threading.Thread(target=delete_worker, args=(67,stop,), name="delete worker: 67")
     ]
 
     for i in threads:
@@ -91,11 +94,19 @@ async def bulk_create_job(req: list[JOB_REQUEST]):
 @app.get("/download/{job_id}")
 async def download_file(job_id):
     print(job_id)
-    file = [i for i in FINISHED_DIR.glob(f"*_{job_id}.mp3")]
+    file = next(iter(FINISHED_DIR.glob(f"*_{job_id}.mp3")))
+
+    updated_job = store.get(job_id=job_id)
+    if not updated_job: return { "success": False, "status_code": 404, "message": "Job id does not exist" }
+    updated_job.is_downloaded = True
+    updated_job.file_name = file.name
+    updated_job.file_path = file
+    updated_job.downloaded_at = datetime.now().timestamp()
+    store.update_job(job_id, updated_job)
 
     return FileResponse(
-        path=file[0],
-        filename=str(str(file[0].name).split("_")[0]+ "."+str(file[0].name).split(".")[1]),
+        path=file,
+        filename=str(str(file.name).split("_")[0]+ "."+str(file.name).split(".")[1]),
         content_disposition_type="attachment"
     )
 

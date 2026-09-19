@@ -14,7 +14,8 @@ spotify_settings = {
 api_settings = {
     "port": int(str(os.getenv("port"))),
     "host": str(os.getenv("host")),
-    "env": str(os.getenv("env"))
+    "env": str(os.getenv("env")),
+    "expires_in": float(str(os.getenv("expires_in")))
 }
 
 thread_settings = {
