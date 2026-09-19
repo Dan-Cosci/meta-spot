@@ -2,7 +2,7 @@ FROM alpine:latest
 
 WORKDIR /app
 
-RUN command apk add nodejs npm curl nginx
+RUN apk add nodejs npm curl nginx
 
 COPY package*.json ./
 
