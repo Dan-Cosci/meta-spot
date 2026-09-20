@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import api from "./services/api.service";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
+import axios from "axios";
 
 interface Que {
   query: string;
@@ -15,18 +16,28 @@ export default function App() {
   const [que, setQue] = useState<Que[]>();
 
   useEffect(() => {
+    console.log(que)
     const interval = setInterval(async () => {
+
       // skips 1st run
       if (!que) return;
 
       for (const item of que) {
-        if (item.status === "done") continue
-        if (item.status === "failed") continue
+        if (item.status === "done") continue;
+        if (item.status === "failed") continue;
 
-        const res = await api.get(`/status/${item.job_id}`, {});
-        setQue((prev) => (prev ?? []).map((q) =>
-          q.job_id == item.job_id ? {...q, status: res.data.status}:q
-        ));
+        try {
+          const res = await api.get(`/status/${item.job_id}`, {});
+          setQue((prev) => (prev ?? []).map((q) =>
+            q.job_id == item.job_id ? {...q, status: res.data.status}:q
+          ));
+
+        } catch (err) {
+          if (axios.isAxiosError(err) && err.response?.status === 404) {
+            setQue((prev) => (prev ?? []).filter((q) => q.job_id !== item.job_id));
+          }
+
+        }
       }
 
     }, 2000);
