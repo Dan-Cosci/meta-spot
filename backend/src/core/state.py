@@ -1,5 +1,6 @@
 
 import threading
+from datetime import datetime
 
 from models import JOB_QUE, JOB_RESPONSE, JOB_STATUS
 
@@ -16,7 +17,8 @@ class job_store:
                 file_name=None,
                 file_path=None,
                 job_id=job.job_id,
-                song=job.song
+                song=job.song,
+                created_at=datetime.now().timestamp()
             )
 
     def update_status(self, job_id, status: JOB_STATUS):
@@ -42,5 +44,9 @@ class job_store:
     def list_downloaded(self) -> list:
         with self.lock:
             return [key for key,i in self.jobs.items() if i.is_downloaded]
+
+    def list_failed(self) -> list:
+        with self.lock:
+            return [key for key, i in self.jobs.items() if i.status == JOB_STATUS.FAILED]
 
 store = job_store()

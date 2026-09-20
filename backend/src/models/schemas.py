@@ -7,9 +7,9 @@ from pydantic import BaseModel
 
 
 class JOB_STATUS(Enum):
-    PENDING = "pending",
-    PROCESSING = "processing",
-    DONE = "done",
+    PENDING = "pending"
+    PROCESSING = "processing"
+    DONE = "done"
     FAILED = "failed"
 
 
@@ -25,3 +25,4 @@ class JOB_QUE(JOB_RESPONSE):
     file_path: str | Path | None = None
     is_downloaded: bool = False
     downloaded_at: float | None = None
+    created_at: float | None = None

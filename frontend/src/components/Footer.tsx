@@ -11,7 +11,7 @@ export default function Footer() {
           <div className="flex flex-col gap-3">
             <div className="flex flex-row items-center gap-2">
               <img src={Logo} alt="meta spot logo" className="w-8" />
-              <span className="font-bold">Meta-spot</span>
+              <span className="font-bold text-white">Meta-spot</span>
             </div>
             <p className="text-sm text-neutral-500">
               Make your MP3s complete with metadata and cover art.

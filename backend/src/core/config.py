@@ -5,20 +5,21 @@ from dotenv import load_dotenv
 load_dotenv(".env.local")
 
 spotify_settings = {
-    "client_id": str(os.getenv("spotify_client_id")),
-    "client_secret": str(os.getenv("spotify_client_secret")),
-    "token_api": str(os.getenv("spotify_token_api")),
-    "api": str(os.getenv("spotify_api")),
+    "client_id": os.getenv("spotify_client_id", ""),
+    "client_secret": os.getenv("spotify_client_secret", ""),
+    "token_api": os.getenv("spotify_token_api", "https://accounts.spotify.com/api/token"),
+    "api": os.getenv("spotify_api", "https://api.spotify.com/v1/"),
 }
 
 api_settings = {
-    "port": int(str(os.getenv("port"))),
-    "host": str(os.getenv("host")),
-    "env": str(os.getenv("env")),
-    "expires_in": float(str(os.getenv("expires_in")))
+    "port": int(os.getenv("port", "8080")),
+    "host": os.getenv("host", "0.0.0.0"),
+    "env": os.getenv("env", "development"),
+    # Seconds a downloaded file is kept before the delete worker removes it.
+    "expires_in": float(os.getenv("expires_in", "3600")),
 }
 
 thread_settings = {
-    "max_que": int(str(os.getenv("max_que"))),
-    "max_threads": int(str(os.getenv("max_threads")))
+    "max_que": int(os.getenv("max_que", "100")),
+    "max_threads": int(os.getenv("max_threads", "3")),
 }
