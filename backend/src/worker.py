@@ -28,18 +28,19 @@ def process_job(task):
 
             song_name= format_song(spotify_data)
             art = get_music_cover(base=JOBS_DIR, file_name=job_name, track_data=spotify_data)
+            output_name = f"{song_name}_{job_name}.mp3"
             tag_with_cover(
                 cover=art,
                 input_audio=Path(JOBS_DIR, f"{job_name}.mp3"),
                 track=spotify_data,
-                output_audio=Path(FINISHED_DIR, f"{song_name}_{job_name}.mp3")
+                output_audio=Path(FINISHED_DIR, output_name)
             )
 
             updated_job = store.get(task.job_id)
             if not updated_job: return
 
             updated_job.file_name=str(song_name+".mp3")
-            updated_job.file_path=FINISHED_DIR
+            updated_job.file_path=Path(FINISHED_DIR, output_name)
             updated_job.status=JOB_STATUS.DONE
 
             store.update_job(job_id=task.job_id, item=updated_job)
@@ -85,6 +86,20 @@ def delete_worker(id: int, stop: threading.Event):
                     for i in JOBS_DIR.glob(f"{item}.*"): clean_job(i)
                     store.delete(item)
                     print(f"Clean process: Deleted failed job: {item}")
+
+            done = store.list_done()
+            if done:
+                for item in done:
+                    job = store.get(item)
+                    if not job: continue
+
+                    if job.created_at + api_settings["expires_in"] <= datetime.now().timestamp(): continue
+
+                    for i in FINISHED_DIR.glob(f"*_{item}.*"): clean_job(i)
+                    store.delete(item)
+                    print(f"Clean process: Deleted jobs not downloaded: {item}")
+
+
 
 
         except Exception as e:

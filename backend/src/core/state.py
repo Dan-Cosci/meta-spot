@@ -49,4 +49,9 @@ class job_store:
         with self.lock:
             return [key for key, i in self.jobs.items() if i.status == JOB_STATUS.FAILED]
 
+    def list_done(self) -> list:
+        with self.lock:
+            return [key for key, i in self.jobs.items() if i.status == JOB_STATUS.DONE]
+
+
 store = job_store()
