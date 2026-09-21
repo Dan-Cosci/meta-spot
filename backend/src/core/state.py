@@ -51,7 +51,7 @@ class job_store:
 
     def list_done(self) -> list:
         with self.lock:
-            return [key for key, i in self.jobs.items() if i.status == JOB_STATUS.DONE]
+            return [key for key, i in self.jobs.items() if i.status == JOB_STATUS.DONE and not i.is_downloaded]
 
 
 store = job_store()

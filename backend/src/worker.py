@@ -1,9 +1,8 @@
 import threading
-from datetime import datetime
 from pathlib import Path
 from queue import Queue
 
-from core import FINISHED_DIR, JOBS_DIR, api_settings, store
+from core import FINISHED_DIR, JOBS_DIR, store
 from models import JOB_STATUS
 from services import (
     clean_job,
@@ -14,6 +13,7 @@ from services import (
     get_music_cover,
     tag_with_cover,
 )
+from utils import get_current_timestamp, time_expires_in
 
 
 def process_job(task):
@@ -72,9 +72,9 @@ def delete_worker(id: int, stop: threading.Event):
                     job = store.get(item)
                     if job is None or job.downloaded_at is None: continue
 
-                    if job.downloaded_at + api_settings["expires_in"] <= datetime.now().timestamp():
-                        store.delete(item)
+                    if time_expires_in(job.downloaded_at) <= get_current_timestamp():
                         clean_job(job.file_path)
+                        store.delete(item)
                         print(f"Clean process: Deleted {job.file_name}")
 
 
@@ -87,13 +87,14 @@ def delete_worker(id: int, stop: threading.Event):
                     store.delete(item)
                     print(f"Clean process: Deleted failed job: {item}")
 
+
             done = store.list_done()
             if done:
                 for item in done:
                     job = store.get(item)
                     if not job: continue
 
-                    if job.created_at + api_settings["expires_in"] <= datetime.now().timestamp(): continue
+                    if time_expires_in(job.created_at) >= get_current_timestamp(): continue
 
                     for i in FINISHED_DIR.glob(f"*_{item}.*"): clean_job(i)
                     store.delete(item)
