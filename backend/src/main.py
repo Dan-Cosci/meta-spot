@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from core import FINISHED_DIR, api_settings, store
+from core import FINISHED_DIR, api_settings, cors_settings, store
 from models import JOB_REQUEST, JOB_RESPONSE
 from services import check_dirs
 from worker import delete_worker, worker
@@ -20,6 +20,7 @@ WORKER_THREADS: list = []
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("process start")
+    print(api_settings,cors_settings)
     check_dirs()
 
     stop = threading.Event()
@@ -49,9 +50,10 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"]
+    allow_origins=cors_settings["allowed_origins"],
+    allow_methods=cors_settings["allowed_methods"],
+    allow_headers=["*"],
+    expose_headers=["Content-Disposition"]
 )
 
 

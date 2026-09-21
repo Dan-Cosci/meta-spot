@@ -62,7 +62,9 @@ export default function App() {
 
   const handleDownload = async (job_id: string) => {
     if (job_id === "") return;
-    window.location.href = `${api.defaults.baseURL}/download/${job_id}`
+    const res = await api.get(`/download/${job_id}`);
+    console.log('res :>> ', res.headers);
+
   }
 
   return (

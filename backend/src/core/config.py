@@ -19,6 +19,11 @@ api_settings = {
     "expires_in": float(os.getenv("expires_in", "3600")),
 }
 
+cors_settings = {
+    "allowed_methods": str(os.getenv("allowed_methods")).split(","),
+    "allowed_origins": str(os.getenv("allowed_origins")).split(","),
+}
+
 thread_settings = {
     "max_que": int(os.getenv("max_que", "100")),
     "max_threads": int(os.getenv("max_threads", "3")),

@@ -1,23 +1,24 @@
-from .config import spotify_settings, api_settings
+from .config import api_settings, cors_settings, spotify_settings
 from .files import (
     BASE_DIR,
+    FINISHED_DIR,
+    JOBS_DIR,
+    QUE_DIR,
     SRC_DIR,
     TEMP_DIR,
-    QUE_DIR,
-    JOBS_DIR,
-    FINISHED_DIR,
 )
 from .state import job_store, store
 
 __all__ = [
-    "spotify_settings",
-    "api_settings",
     "BASE_DIR",
+    "FINISHED_DIR",
+    "JOBS_DIR",
+    "QUE_DIR",
     "SRC_DIR",
     "TEMP_DIR",
-    "QUE_DIR",
-    "JOBS_DIR",
-    "FINISHED_DIR",
+    "api_settings",
+    "cors_settings",
     "job_store",
+    "spotify_settings",
     "store",
 ]
