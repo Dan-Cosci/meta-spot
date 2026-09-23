@@ -7,6 +7,7 @@ import requests
 from core import spotify_settings
 from models import JOB_RESPONSE
 from services.file_service import write_img
+from utils import get_current_timestamp
 
 
 def get_token():
@@ -14,7 +15,7 @@ def get_token():
     if Path(".token").exists():
         with open(".token","r") as file:
             cur = json.load(file)
-            if datetime.now().timestamp() < cur["expires_at"]:
+            if get_current_timestamp() < cur["expires_at"]:
                 return cur["access_token"]
 
     data = {
@@ -24,7 +25,7 @@ def get_token():
     }
 
     res = requests.post(spotify_settings["token_api"], data=data).json()
-    res["expires_at"] = datetime.now().timestamp() + res["expires_in"]
+    res["expires_at"] = get_current_timestamp() + res["expires_in"]
     with open(".token", "w") as file: json.dump(res, file, indent=2)
 
     print("Requested new access token")

@@ -1,26 +1,27 @@
 
+import asyncio
 import threading
 from contextlib import asynccontextmanager
-from datetime import datetime
-from queue import Queue
+from queue import Full, Queue
 from uuid import uuid4
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from core import FINISHED_DIR, api_settings, cors_settings, store
+from core import FINISHED_DIR, api_settings, cors_settings, store, thread_settings
 from models import JOB_REQUEST, JOB_RESPONSE
 from services import check_dirs
+from utils import get_current_timestamp
 from worker import delete_worker, worker
 
-PROCESS_QUE: Queue = Queue()
+PROCESS_QUE: Queue = Queue(maxsize=thread_settings["max_que"])
 WORKER_THREADS: list = []
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("process start")
-    print(api_settings,cors_settings)
+    # print(api_settings,cors_settings)
     check_dirs()
 
     stop = threading.Event()
@@ -28,7 +29,7 @@ async def lifespan(app: FastAPI):
     # adding the workers
     [
         WORKER_THREADS.append(threading.Thread(target=worker, args=(i, PROCESS_QUE, stop), name=f"worker: {i}"))
-        for i in range(3)
+        for i in range(thread_settings["max_threads"])
     ]
 
     # adding the delete worker
@@ -82,12 +83,24 @@ async def create_job(req: JOB_REQUEST):
         job_id=id,
         song=req.song
     )
-    PROCESS_QUE.put(job)
-    return JSONResponse(status_code=201, content={
-        "success": True,
-        "Message": "Created request",
-        "data": job.model_dump(mode="json")
-    })
+
+    deadline = asyncio.get_event_loop().time() + 5
+    while True:
+        try:
+            PROCESS_QUE.put_nowait(job)
+            return JSONResponse(status_code=201, content={
+                "success": True,
+                "Message": "Created request",
+                "data": job.model_dump(mode="json")
+            })
+        except Full:
+            if asyncio.get_event_loop().time() >= deadline:
+                return JSONResponse(status_code=503, headers={"Retry-After": "5"},
+                    content={
+                        "success": False,
+                        "Message": "Queue is full, try again later"
+                    })
+            await asyncio.sleep(0.25)
 
 
 @app.post("/job/bulk")
@@ -122,7 +135,7 @@ async def download_file(job_id):
 
     file = files[0]
     job.is_downloaded = True
-    job.downloaded_at = datetime.now().timestamp()
+    job.downloaded_at = get_current_timestamp()
     store.update_job(job_id=job_id, item=job)
 
     return FileResponse(
