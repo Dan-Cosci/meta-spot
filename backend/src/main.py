@@ -11,6 +11,7 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from core import FINISHED_DIR, api_settings, cors_settings, store, thread_settings
 from models import JOB_REQUEST, JOB_RESPONSE
+from routes import process_router, music_router
 from services import check_dirs
 from utils import get_current_timestamp
 from worker import delete_worker, worker
@@ -58,6 +59,8 @@ app.add_middleware(CORSMiddleware,
 )
 
 
+app.include_router(process_router)
+app.include_router(music_router)
 
 @app.get("/health")
 def health():

@@ -1,0 +1,138 @@
+import { useEffect, useState, type SubmitEvent } from "react";
+import toast from "react-hot-toast";
+import api from "../services/api.service";import axios from "axios";
+
+import { type Que } from "@/types";
+
+function Download() {
+
+  const [query, setQuery] = useState<string>("");
+  const [que, setQue] = useState<Que[]>();
+
+  useEffect(() => {
+    console.log(que)
+    const interval = setInterval(async () => {
+
+      // skips 1st run
+      if (!que) return;
+
+      for (const item of que) {
+        if (item.status === "done") continue;
+        if (item.status === "failed") continue;
+
+        try {
+          const res = await api.get(`/status/${item.job_id}`, {});
+          setQue((prev) => (prev ?? []).map((q) =>
+            q.job_id == item.job_id ? {...q, status: res.data.status}: q
+          ));
+
+        } catch (err) {
+          if (axios.isAxiosError(err) && err.response?.status === 404) {
+            setQue((prev) => (prev ?? []).filter((q) => q.job_id !== item.job_id));
+          }
+
+        }
+      }
+
+    }, 2000);
+
+    return () => clearInterval(interval)
+  }, [que]);
+
+  const handleInsert = async (e: SubmitEvent) => {
+    e.preventDefault();
+    if (query === "") {
+      toast.error("You can't submit blank");
+      return;
+    }
+
+    const song = query;
+    const res = await api.post("/job", { song: song });
+    const data = res.data.data;
+    setQue((prev) => [...(prev ?? []), { query: song, status: "pending", job_id:data.job_id}]);
+    setQuery("");
+
+  }
+
+  const handleDownload = async (job_id: string) => {
+    if (job_id === "") return;
+    const res = await api.get(`/download/${job_id}`);
+    console.log('res :>> ', res.headers);
+
+  }
+
+  return (
+    <>
+      <h1 className="text-3xl font-bold">Own your <span className="text-green-300">music</span>, Listen without the <span className="text-green-300">subscription</span></h1>
+      <form onSubmit={handleInsert} className="flex max-md:flex-col p-8 md:items-center items-end">
+        <input
+          type="text"
+          name="song"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Song name - artist name..."
+          className="bg-neutral-900 border border-green-300 rounded-4xl focus:outline-none max-md:w-[80vw] w-[50vw] text-xl px-8 py-3 max-md:mb-4"
+        />
+        <button type="submit" className="bg-transparent w-32 h-10  max-md:ml-0 ml-5 rounded-4xl text-green-300 border-2 border-green-300 hover:bg-green-300 hover:text-white hover:scale-105 transition-all duration-150 active:scale-95">
+          add to que
+        </button>
+      </form>
+
+      {que && (
+        <section className="w-full max-w-2xl flex flex-col gap-3">
+          {/* Header */}
+          <div className="flex flex-row justify-between items-center">
+            <h2 className="text-sm font-semibold text-neutral-400 uppercase tracking-wider">
+              Queue
+            </h2>
+            <span className="text-sm text-neutral-500">{que.length} songs</span>
+          </div>
+
+          {/* Items */}
+          <div className="flex flex-col gap-2">
+            {que.map((item, i) => (
+              <div
+                key={i}
+                className="flex flex-row items-center justify-between
+                          px-4 py-3 rounded-lg border border-neutral-800
+                          bg-neutral-800/50"
+              >
+                {/* Left: status icon */}
+                <div className="flex flex-row items-center gap-3">
+                  {item.status === "done" && <span className="text-green-400">✓</span>}
+                  {item.status === "pending" && <span className="text-amber-300 animate-pulse">·</span>}
+                  {item.status === "failed" && <span className="text-red-400">✕</span>}
+
+                  <span className="truncate max-w-[40ch]">{item.query}</span>
+                </div>
+
+                {/* Right: status label */}
+                <span
+                  className={`text-xs shrink-0 ml-3 ${
+                    item.status === "done" ? "text-green-400"
+                    : item.status === "pending" ? "text-amber-300"
+                    : item.status === "failed" ? "text-red-400"
+                    : "text-neutral-500"
+                  }`}
+                >
+                  {item.status === "pending" &&
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-amber-300 border-t-transparent inline-block mr-2"></div>
+                  }
+                  {item.status}
+                  {item.status === "done" &&
+                    <button className="ml-4 bg-green-300 text-white font-semibold px-2 py-1 rounded-4xl transition-all duration-150 active:scale-95"
+                      onClick={ () => handleDownload(item.job_id) }>
+                      Download
+                    </button>
+                  }
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+    </>
+  );
+}
+
+export default Download;
