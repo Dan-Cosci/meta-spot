@@ -2,20 +2,14 @@ import subprocess
 from pathlib import Path
 
 
-def clean_spotify_data(data: dict):
-    return data["tracks"]["items"][0]
-
-def format_song(track: dict):
-    return f"{track["album"]["artists"][0]["name"]} - {track["name"]}"
-
 def build_metadata(track: dict):
     """Convert Spotify track data into repeated ffmpeg -metadata args."""
     artist = track["artists"][0]["name"]
     title = track["name"]
     album = track["album"]["name"]
     track_number = track["track_number"]
-    date = track["album"]["release_date"]
-    spotify_url = track["external_urls"]["spotify"]
+    date = track["release_date"]
+    spotify_url = track["share_url"]
 
     return [
         "-metadata", f"title={title}",

@@ -2,10 +2,12 @@ import json
 from pathlib import Path
 
 import requests
+from spotify_scraper import Track
 
 from core import spotify_settings
 from models import JOB_RESPONSE
 from services.file_service import write_img
+from core import client_store
 from utils import get_current_timestamp
 
 
@@ -30,13 +32,15 @@ def get_token():
     print("Requested new access token")
     return res["access_token"]
 
-def get_metadata(job_file:JOB_RESPONSE):
-    params = {
-        "q": f"{job_file.song}",
-        "type" : "track",
-        "limit": 1
-    }
-    return requests.get(spotify_settings["api"]+"search", params=params, headers={"Authorization": f"Bearer {get_token()}"}).json()
+
+def search_track(worker_id: int, q: str, types=("track",), limit=5 ):
+    client = client_store.get(worker_id=worker_id)
+    res = client.search(q, types=types, limit=limit)
+    return res.to_dict()["tracks"][0]["id"]
+
+def get_track_data(worker_id: int, track_id: str):
+    client = client_store.get(worker_id=worker_id)
+    return client.get_track(track_id).to_dict()
 
 def get_music_cover(track_data: dict, file_name: Path | str, base: Path) -> Path:
     url = track_data["album"]["images"][0]["url"]

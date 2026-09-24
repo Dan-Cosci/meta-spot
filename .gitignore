@@ -76,3 +76,6 @@ REVIEW*.md
 
 # dev notes
 notebook/
+PLAN.md
+architecture.md
+test.py

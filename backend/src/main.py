@@ -9,10 +9,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from core import FINISHED_DIR, api_settings, cors_settings, store, thread_settings
+from core import FINISHED_DIR, api_settings, client_store, cors_settings, job_store, thread_settings
 from models import JOB_REQUEST, JOB_RESPONSE
 from routes import process_router, music_router
-from services import check_dirs
 from utils import get_current_timestamp
 from worker import delete_worker, worker
 
@@ -23,15 +22,13 @@ WORKER_THREADS: list = []
 async def lifespan(app: FastAPI):
     print("process start")
     # print(api_settings,cors_settings)
-    check_dirs()
 
     stop = threading.Event()
 
     # adding the workers
-    [
+    for i in range(thread_settings["max_threads"]):
+        client_store.register(i)
         WORKER_THREADS.append(threading.Thread(target=worker, args=(i, PROCESS_QUE, stop), name=f"worker: {i}"))
-        for i in range(thread_settings["max_threads"])
-    ]
 
     # adding the delete worker
     WORKER_THREADS.append(threading.Thread(target=delete_worker, args=(67,stop,), name="delete worker: 67"))
@@ -128,7 +125,7 @@ async def bulk_create_job(req: list[JOB_REQUEST]):
 
 @app.get("/download/{job_id}")
 async def download_file(job_id):
-    job = store.get(job_id=job_id)
+    job = job_store.get(job_id=job_id)
     if not job:
         return JSONResponse(status_code=404, content={"success": False, "message": "Job id does not exist"})
 
@@ -139,7 +136,7 @@ async def download_file(job_id):
     file = files[0]
     job.is_downloaded = True
     job.downloaded_at = get_current_timestamp()
-    store.update_job(job_id=job_id, item=job)
+    job_store.update_job(job_id=job_id, item=job)
 
     return FileResponse(
         path=file,
@@ -149,7 +146,7 @@ async def download_file(job_id):
 
 @app.get("/status/{job_id}")
 async def job_status(job_id):
-    job = store.get(job_id)
+    job = job_store.get(job_id)
     if not job:
         return JSONResponse(status_code=404, content={"success": False, "message": "job_id does not exist"})
 

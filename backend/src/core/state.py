@@ -1,11 +1,13 @@
 
 import threading
-from datetime import datetime
+
+from spotify_scraper import SpotifyClient
 
 from models import JOB_QUE, JOB_RESPONSE, JOB_STATUS
+from utils import get_current_timestamp
 
 
-class job_store:
+class _job_store:
     def __init__(self) -> None:
         self.lock = threading.Lock()
         self.jobs = {}
@@ -18,7 +20,7 @@ class job_store:
                 file_path=None,
                 job_id=job.job_id,
                 song=job.song,
-                created_at=datetime.now().timestamp()
+                created_at=get_current_timestamp()
             )
 
     def update_status(self, job_id, status: JOB_STATUS):
@@ -54,4 +56,36 @@ class job_store:
             return [key for key, i in self.jobs.items() if i.status == JOB_STATUS.DONE and not i.is_downloaded]
 
 
-store = job_store()
+class _client_store:
+    def __init__(self) -> None:
+        self.lock = threading.Lock()
+        self.clients: dict[int, SpotifyClient] = {}
+
+    def register(self, worker_id: int, proxy: str | None = None):
+        client = SpotifyClient(proxy=proxy, timeout=15)
+        with self.lock:
+            self.clients[worker_id] = client
+        return client
+
+    def get(self, worker_id) -> SpotifyClient:
+        with self.lock:
+            try:
+                return self.clients[worker_id]
+
+            except KeyError:
+                raise RuntimeError(f"error client_store: {worker_id} does not have clients assigned to them")
+
+    def close_all(self):
+        with self.lock:
+            for client in self.clients.values():
+                client.close()
+
+            self.clients.clear()
+
+
+
+
+
+
+job_store = _job_store()
+client_store = _client_store()

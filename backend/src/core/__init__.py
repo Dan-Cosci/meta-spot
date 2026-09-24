@@ -7,7 +7,7 @@ from .files import (
     SRC_DIR,
     TEMP_DIR,
 )
-from .state import job_store, store
+from .state import client_store, job_store
 
 __all__ = [
     "BASE_DIR",
@@ -17,9 +17,9 @@ __all__ = [
     "SRC_DIR",
     "TEMP_DIR",
     "api_settings",
+    "client_store",
     "cors_settings",
     "job_store",
     "spotify_settings",
-    "store",
-    "thread_settings",
+    "thread_settings"
 ]

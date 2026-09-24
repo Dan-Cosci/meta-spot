@@ -9,6 +9,7 @@ dependencies = [
     "python-dotenv>=1.2.3",
     "requests>=2.34.2",
     "slowapi>=0.1.10",
+    "spotifyscraper>=3.9.2",
     "yt-dlp>=2026.8.19",
 ]
 
