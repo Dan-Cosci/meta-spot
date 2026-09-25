@@ -11,8 +11,8 @@ function Dashboard() {
   }
 
   useEffect(() => {
-
-  }, []);
+    console.log("this is ran once")
+  });
 
 
 

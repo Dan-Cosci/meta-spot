@@ -12,7 +12,6 @@ class JOB_STATUS(Enum):
     DONE = "done"
     FAILED = "failed"
 
-
 class JOB_REQUEST(BaseModel):
     song: str
 

@@ -1,4 +1,4 @@
-from .config import api_settings, cors_settings, spotify_settings, thread_settings
+from .config import api_settings, cors_settings, spotify_settings, thread_settings, PROCESS_QUE
 from .files import (
     BASE_DIR,
     FINISHED_DIR,

@@ -1,4 +1,5 @@
 import os
+from queue import Queue
 
 from dotenv import load_dotenv
 
@@ -28,3 +29,5 @@ thread_settings = {
     "max_que": int(os.getenv("max_que", "100")),
     "max_threads": int(os.getenv("max_threads", "3")),
 }
+
+PROCESS_QUE: Queue = Queue(maxsize=thread_settings["max_que"])

@@ -1,21 +1,16 @@
 
-import asyncio
 import threading
 from contextlib import asynccontextmanager
-from queue import Full, Queue
-from uuid import uuid4
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import JSONResponse
 
-from core import FINISHED_DIR, api_settings, client_store, cors_settings, job_store, thread_settings
-from models import JOB_REQUEST, JOB_RESPONSE
-from routes import process_router, music_router
-from utils import get_current_timestamp
+from core import api_settings, client_store, cors_settings, thread_settings
+from core.config import PROCESS_QUE
+from routes import music_router, process_router
 from worker import delete_worker, worker
 
-PROCESS_QUE: Queue = Queue(maxsize=thread_settings["max_que"])
 WORKER_THREADS: list = []
 
 @asynccontextmanager
@@ -32,6 +27,9 @@ async def lifespan(app: FastAPI):
 
     # adding the delete worker
     WORKER_THREADS.append(threading.Thread(target=delete_worker, args=(67,stop,), name="delete worker: 67"))
+
+    # spotifyClient for data requesting
+    client_store.register(worker_id=77)
 
     for i in WORKER_THREADS:
         i.start()
@@ -75,85 +73,6 @@ def health():
             }
         }
     )
-
-@app.post("/job")
-async def create_job(req: JOB_REQUEST):
-    id = uuid4()
-    job = JOB_RESPONSE(
-        job_id=id,
-        song=req.song
-    )
-
-    deadline = asyncio.get_event_loop().time() + 5
-    while True:
-        try:
-            PROCESS_QUE.put_nowait(job)
-            return JSONResponse(status_code=201, content={
-                "success": True,
-                "Message": "Created request",
-                "data": job.model_dump(mode="json")
-            })
-        except Full:
-            if asyncio.get_event_loop().time() >= deadline:
-                return JSONResponse(status_code=503, headers={"Retry-After": "5"},
-                    content={
-                        "success": False,
-                        "Message": "Queue is full, try again later"
-                    })
-            await asyncio.sleep(0.25)
-
-
-@app.post("/job/bulk")
-async def bulk_create_job(req: list[JOB_REQUEST]):
-
-    jobs = []
-    for i in req:
-        id = uuid4()
-        job = JOB_RESPONSE(
-            job_id=id,
-            song=i.song
-        )
-        jobs.append(job)
-
-    for i in jobs: PROCESS_QUE.put(i)
-
-    return JSONResponse(status_code=201, content={
-        "success": True,
-        "Message": "created requests",
-        "data": [j.model_dump(mode="json") for j in jobs]
-    })
-
-@app.get("/download/{job_id}")
-async def download_file(job_id):
-    job = job_store.get(job_id=job_id)
-    if not job:
-        return JSONResponse(status_code=404, content={"success": False, "message": "Job id does not exist"})
-
-    files = [f for f in FINISHED_DIR.glob(f"*_{job_id}.mp3")]
-    if not files:
-        return JSONResponse(status_code=404, content={"success": False, "message": "File not found"})
-
-    file = files[0]
-    job.is_downloaded = True
-    job.downloaded_at = get_current_timestamp()
-    job_store.update_job(job_id=job_id, item=job)
-
-    return FileResponse(
-        path=file,
-        filename=job.file_name or file.name,
-        content_disposition_type="attachment"
-    )
-
-@app.get("/status/{job_id}")
-async def job_status(job_id):
-    job = job_store.get(job_id)
-    if not job:
-        return JSONResponse(status_code=404, content={"success": False, "message": "job_id does not exist"})
-
-    return JSONResponse(content={
-        "job_id": job_id,
-        "status": job.status.value
-    })
 
 if __name__ == "__main__":
     import uvicorn
