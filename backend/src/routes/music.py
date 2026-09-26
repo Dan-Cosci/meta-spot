@@ -1,6 +1,5 @@
-import json
-
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
+from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 
 from core import client_store
@@ -27,18 +26,17 @@ async def get_track_data(
     })
 
     client = client_store.get(77)
+    data = None
 
     if type == "track": data = client.get_track(id)
     if type == "artist": data = client.get_artist(id)
+    if not data: raise HTTPException(status_code=500)
 
     return JSONResponse({
         "success": True,
         "message": f"{type} data success",
         "data" : data.to_dict()
     })
-
-
-
 
 
 @router.get("/search")
