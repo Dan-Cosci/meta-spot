@@ -1,8 +1,8 @@
 import axios from "axios";
 import { api_url } from "../config/config";
 
-const api = axios.create({
+const instance = axios.create({
   baseURL: api_url
 });
 
-export default api
+export default instance

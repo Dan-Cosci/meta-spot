@@ -6,12 +6,16 @@ from core import client_store
 
 router = APIRouter(prefix="/music")
 
-@router.get("/")
-async def hello():
+@router.get("")
+async def dashboard_data():
+    client = client_store.get(77)
+
+    data = client.get_chart(key="todays-top-hits").to_dict()
 
     return JSONResponse({
         "success": True,
-        "message": "Welcome to spotify"
+        "message": "Dashboard request successfuly",
+        "data": data
     })
 
 @router.get("/data/{id}")

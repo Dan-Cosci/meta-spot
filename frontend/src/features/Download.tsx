@@ -1,6 +1,6 @@
 import { useEffect, useState, type SubmitEvent } from "react";
 import toast from "react-hot-toast";
-import api from "../services/api.service";import axios from "axios";
+import instance from "../services/api.service";import axios from "axios";
 
 import { type Que } from "@/types";
 
@@ -21,7 +21,7 @@ function Download() {
         if (item.status === "failed") continue;
 
         try {
-          const res = await api.get(`/status/${item.job_id}`, {});
+          const res = await instance.get(`/status/${item.job_id}`, {});
           setQue((prev) => (prev ?? []).map((q) =>
             q.job_id == item.job_id ? {...q, status: res.data.status}: q
           ));
@@ -47,7 +47,7 @@ function Download() {
     }
 
     const song = query;
-    const res = await api.post("/job", { song: song });
+    const res = await instance.post("/job", { song: song });
     const data = res.data.data;
     setQue((prev) => [...(prev ?? []), { query: song, status: "pending", job_id:data.job_id}]);
     setQuery("");
@@ -56,7 +56,7 @@ function Download() {
 
   const handleDownload = async (job_id: string) => {
     if (job_id === "") return;
-    const res = await api.get(`/download/${job_id}`);
+    const res = await instance.get(`/download/${job_id}`);
     console.log('res :>> ', res.headers);
 
   }
