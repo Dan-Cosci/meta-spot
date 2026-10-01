@@ -4,13 +4,17 @@ import './index.css'
 import App from './App.tsx'
 import { Toaster } from 'react-hot-toast';
 import { RouterProvider } from 'react-router/dom';
+import { ThemeProvider } from './hooks/Theme.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={App} />
+    <ThemeProvider>
+      <RouterProvider router={App} />
+    </ThemeProvider>
     <Toaster
       position='top-center'
       reverseOrder={ false }
     />
+
   </StrictMode>,
 )
