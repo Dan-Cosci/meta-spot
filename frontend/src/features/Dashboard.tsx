@@ -16,18 +16,7 @@ function Dashboard() {
   const [tracks, setTracks] = useState<TrackData[]>([]);
   const open = selected ? true : false;
 
-  const onClose = () => {
-    setSelected(null);
-    audioRef.current?.pause()
-  }
-
-  const toggle = () => {
-    const a = audioRef.current;
-    setPlay(prev => !prev);
-    if (!a) return;
-    a.paused ? a.play().catch(() => { }) : a.pause();
-  }
-
+  // fetch top songs
   useEffect(() => {
     console.log("this is ran once")
 
@@ -40,46 +29,96 @@ function Dashboard() {
 
     fetchtracks().then(() => setLoading(false));
 
-  },[]);
+  }, []);
+
+  // player logic
+  useEffect(() => {
+    const a = audioRef.current;
+    if (!a) return;
+
+    const onTime = () => setCurrent(a.currentTime);
+    const onMeta = () => setDuration(a.duration);
+    const onPlay = () => setPlay(true);
+    const onPause = () => setPlay(false);
+    const onEnded = () => {
+      setPlay(false);
+      setCurrent(0);
+    };
+
+    a.addEventListener("timeupdate", onTime);
+    a.addEventListener("loadedmetadata", onMeta);
+    a.addEventListener("play", onPlay);
+    a.addEventListener("pause", onPause);
+    a.addEventListener("ended", onEnded);
+
+    return () => {
+      a.removeEventListener("timeupdate", onTime);
+      a.removeEventListener("loadedmetadata", onMeta);
+      a.removeEventListener("play", onPlay);
+      a.removeEventListener("pause", onPause);
+      a.removeEventListener("ended", onEnded);
+    };
+  }, []);
+
+  const onClose = () => {
+    setSelected(null);
+    setPlay(false);
+    setCurrent(0);
+    setDuration(0);
+    audioRef.current?.pause();
+  };
+
+  const toggle = () => {
+    const a = audioRef.current;
+    setPlay(prev => !prev);
+    if (!a) return;
+    a.paused ? a.play().catch(() => { }) : a.pause();
+  }
+
 
 
   const handleClick = async (el: TrackData) => {
+    const a = audioRef.current;
+    if (!a) return;
+
+    a.pause();
+    setCurrent(0);
+    setDuration(0);
+    setPlay(false);
+
     const data: TrackData = await getTrackData(el.id);
-    console.log(data)
     setSelected(data)
 
 
-
-    audioRef.current.src = data.preview_url;
-    audioRef.current.currentTime = 0;
-
-    console.log(Number(audioRef.current?.duration))
+    if (!data.preview_url) return;
+    a.src = data.preview_url;
+    a.load();
   }
 
   return (
     <>
       <audio ref={audioRef} />
       {loading ? <Loading /> :<>
-      <section className="flex gap-5 overflow-scroll w-full scrollbar-none">
+      <section className="flex gap-1 overflow-scroll w-full scrollbar-none">
         {tracks.map(el => (
-          <div className="bg-background shrink-0 w-[16rem] flex rounded-2xl gap-4">
-            <div className="w-18 h-18 rounded-2xl overflow-hidden">
+          <div className="bg-background shrink-0 w-2xs p-2 flex items-start rounded-2xl gap-4 hover:bg-card-hover">
+            <div className="w-18 h-18 rounded-xl overflow-hidden shrink-0">
               <img src={el.images[2].url} alt="" className="h-full w-full" />
             </div>
             <div className="flex flex-col justify-center items-baseline">
-              <h1 className="">{el.name}</h1>
-              <p className="text-sm text-green-800">{el.artists[0].name}</p>
+              <h1 className="font-bold text-md">{el.name.length >= 21 ? `${el.name.slice(0,21).concat("...")}`: el.name}</h1>
+              <p className="text-sm text-text-muted">{el.artists[0].name}</p>
             </div>
           </div>
         ))}
       </section>
-      <section className="grid grid-cols-2 md:grid-cols-4 mt-16 gap-3.5">
+      <section className="grid grid-cols-2 md:grid-cols-5 mt-8 gap-2">
         {tracks.map(el => (
-          <div key={ el.id } className="rounded-xl p-2 hover:bg-green-900" onClick={()=>handleClick(el)}>
+          <div key={ el.id } className="rounded-xl p-2 hover:bg-card-hover" onClick={()=>handleClick(el)}>
             <img src={ el.images[0].url } alt="" className="rounded-xl"/>
-            <div className="">
-              <h1 className="">{el.name}</h1>
-              <p className="">{el.artists[0].name}</p>
+            <div className="flex flex-col items-baseline">
+              <h1 className="font-bold text-md">{el.name.length >= 22 ? `${el.name.slice(0,22).concat("...")}`: el.name}</h1>
+              <p className="text-sm text-text-muted">{el.artists[0].name}</p>
             </div>
           </div>
         ))}
@@ -99,9 +138,22 @@ function Dashboard() {
             </div>
             <div className="flex gap-4">
               <button onClick={toggle}>{ play ? "pause" : "play"}</button>
-              <p>0:00</p>
-              <input type="range" className="flex-1" />
-              <p>3:14</p>
+              <p>{ current }</p>
+              <input
+                type="range"
+                className="flex-1"
+                value={current}
+                min={0}
+                max={duration|| 0}
+                onChange={(e) => {
+                  const a = audioRef.current;
+                  if (!a) return;
+                  const t = Number(e.target.value);
+                  a.currentTime = t;
+                  setCurrent(t);
+                }}
+              />
+              <p>{ duration }</p>
             </div>
             <div className="flex justify-center items-center gap-4">
               <button className="bg-green-800 p-2 rounded-md w-full">Download now</button>

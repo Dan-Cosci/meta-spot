@@ -56,14 +56,29 @@ function Download() {
 
   const handleDownload = async (job_id: string) => {
     if (job_id === "") return;
-    const res = await instance.get(`/download/${job_id}`);
-    console.log('res :>> ', res.headers);
+    const res = await instance.get(`/download/${job_id}`, {
+      responseType: "blob",
+    });
 
-  }
+    // Extract filename from Content-Disposition
+    const disposition = res.headers["content-disposition"];
+    const match = disposition?.match(/filename\*?=(?:UTF-8'')?["']?([^"';]+)/i);
+    const filename = match ? decodeURIComponent(match[1]) : `track-${job_id}.mp3`;
+
+    // Create a blob URL and trigger download
+    const url = URL.createObjectURL(res.data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <>
-      <h1 className="text-3xl font-bold">Own your <span className="text-green-300">music</span>, Listen without the <span className="text-green-300">subscription</span></h1>
+      <h1 className="text-3xl font-bold">Own your <span className="text-main">music</span>, Listen without the <span className="text-main">subscription</span></h1>
       <form onSubmit={handleInsert} className="flex max-md:flex-col p-8 md:items-center items-end">
         <input
           type="text"
@@ -71,9 +86,9 @@ function Download() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Song name - artist name..."
-          className="bg-neutral-900 border border-green-300 rounded-4xl focus:outline-none max-md:w-[80vw] w-[50vw] text-xl px-8 py-3 max-md:mb-4"
+          className="bg-background border border-main rounded-4xl focus:outline-none max-md:w-[80vw] w-[50vw] text-xl px-8 py-3 max-md:mb-4"
         />
-        <button type="submit" className="bg-transparent w-32 h-10  max-md:ml-0 ml-5 rounded-4xl text-green-300 border-2 border-green-300 hover:bg-green-300 hover:text-white hover:scale-105 transition-all duration-150 active:scale-95">
+        <button type="submit" className="bg-transparent w-32 h-10  max-md:ml-0 ml-5 rounded-4xl text-main border-2 border-main">
           add to que
         </button>
       </form>
@@ -95,7 +110,7 @@ function Download() {
                 key={i}
                 className="flex flex-row items-center justify-between
                           px-4 py-3 rounded-lg border border-neutral-800
-                          bg-neutral-800/50"
+                          bg-background"
               >
                 {/* Left: status icon */}
                 <div className="flex flex-row items-center gap-3">

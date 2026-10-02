@@ -10,7 +10,7 @@ const App = createBrowserRouter([
     Component: RootLayout,
     children: [
       { index: true, Component: Dashboard },
-      { path: "download", Component: Download }
+      { path: "downloads", Component: Download }
     ]
 
   }
