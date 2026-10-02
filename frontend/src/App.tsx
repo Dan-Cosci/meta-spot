@@ -9,8 +9,8 @@ const App = createBrowserRouter([
     path: "/",
     Component: RootLayout,
     children: [
-      { index: true, Component: Download },
-      { path:"dashboard", Component: Dashboard }
+      { index: true, Component: Dashboard },
+      { path: "download", Component: Download }
     ]
 
   }

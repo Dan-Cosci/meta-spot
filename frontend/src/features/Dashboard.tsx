@@ -62,7 +62,7 @@ function Dashboard() {
       {loading ? <Loading /> :<>
       <section className="flex gap-5 overflow-scroll w-full scrollbar-none">
         {tracks.map(el => (
-          <div className="bg-neutral-800 shrink-0 w-[16rem] flex rounded-2xl gap-4">
+          <div className="bg-background shrink-0 w-[16rem] flex rounded-2xl gap-4">
             <div className="w-18 h-18 rounded-2xl overflow-hidden">
               <img src={el.images[2].url} alt="" className="h-full w-full" />
             </div>
