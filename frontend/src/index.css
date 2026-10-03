@@ -12,16 +12,17 @@
     --animate-marquee: marquee 10s linear infinite;
 
     @keyframes marquee {
-    	0% {
-    	    transform: translateX(0%);
-    	}
-
-    	100%{
-            transform: translateX(-50%);
-
-    	}
+    	0% { transform: translateX(0%); }
+    	100% { transform: translateX(-50%); }
     }
+
 }
+
+@utility btn-animation {
+    @apply transition-transform duration-200 hover:scale-105 hover:brightness-105 active:scale-95
+        active:brightness-95
+}
+
 
 [data-theme="light"]{
     ---color-main: var(--color-green-600);

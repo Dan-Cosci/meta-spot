@@ -98,6 +98,17 @@ function Dashboard() {
   return (
     <>
       <audio ref={audioRef} />
+      <div className="p-4 flex gap-4">
+        <input
+          className="px-5 py-2 border-main border-2 outline-0 rounded-full w-[80vw] md:w-[50vw] "
+          type="text"
+        />
+        <button
+          className="btn-animation bg-main px-4 py-2 rounded-full"
+        >
+          Search
+        </button>
+      </div>
       {loading ? <Loading /> :<>
       <section className="flex gap-1 overflow-scroll w-full scrollbar-none">
         {tracks.map(el => (
@@ -156,8 +167,8 @@ function Dashboard() {
               <p>{ duration }</p>
             </div>
             <div className="flex justify-center items-center gap-4">
-              <button className="bg-green-800 p-2 rounded-md w-full">Download now</button>
-              <button className="bg-green-800 p-2 rounded-md w-full">Add to Downloads</button>
+              <button className="bg-main p-2 rounded-md w-full btn-animation">Download now</button>
+              <button className="bg-main p-2 rounded-md w-full btn-animation">Add to Downloads</button>
             </div>
           </div>
         </Modal>

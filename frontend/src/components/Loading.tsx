@@ -2,7 +2,7 @@ import React from 'react'
 
 function Loading() {
   return (
-    <div className='bg-main'>Loading</div>
+    <div className='flex-1'>Loading</div>
   )
 }
 
