@@ -122,7 +122,6 @@ def worker(id: int, q: Queue, stop: threading.Event):
             continue
 
         try:
-            job_store.init_job(job=task)
             process_job(task, id)
 
         except:

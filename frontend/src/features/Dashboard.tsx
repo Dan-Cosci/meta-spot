@@ -3,6 +3,7 @@ import Modal from "@/components/Modal";
 import type { TrackData } from "@/types";
 import { getTopTracks, getTrackData } from "@/services/music.service";
 import Loading from "@/components/Loading";
+import { downloadNow } from "@/lib/lib";
 
 function Dashboard() {
   const [selected, setSelected] = useState<TrackData | null>(null);
@@ -167,7 +168,7 @@ function Dashboard() {
               <p>{ duration }</p>
             </div>
             <div className="flex justify-center items-center gap-4">
-              <button className="bg-main p-2 rounded-md w-full btn-animation">Download now</button>
+              <button className="bg-main p-2 rounded-md w-full btn-animation" onClick={() => downloadNow(selected.id)}>Download now</button>
               <button className="bg-main p-2 rounded-md w-full btn-animation">Add to Downloads</button>
             </div>
           </div>

@@ -24,6 +24,7 @@ async def create_job(req: JOB_REQUEST):
     while True:
         try:
             PROCESS_QUE.put_nowait(job)
+            job_store.init_job(job)
             return JSONResponse(status_code=201, content={
                 "success": True,
                 "Message": "Created request",
@@ -87,6 +88,9 @@ async def job_status(job_id):
         return JSONResponse(status_code=404, content={"success": False, "message": "job_id does not exist"})
 
     return JSONResponse(content={
-        "job_id": job_id,
-        "status": job.status.value
+        "success": True,
+        "data":{
+            "job_id": job_id,
+            "status": job.status.value
+        }
     })

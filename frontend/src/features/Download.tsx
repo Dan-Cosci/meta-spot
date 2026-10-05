@@ -1,6 +1,7 @@
 import { useEffect, useState, type SubmitEvent } from "react";
 import toast from "react-hot-toast";
-import instance from "../services/api.service";import axios from "axios";
+import instance from "../services/api.service"; import axios from "axios";
+import { downloadData } from "@/lib/lib"
 
 import { type Que } from "@/types";
 
@@ -54,27 +55,6 @@ function Download() {
 
   }
 
-  const handleDownload = async (job_id: string) => {
-    if (job_id === "") return;
-    const res = await instance.get(`/download/${job_id}`, {
-      responseType: "blob",
-    });
-
-    // Extract filename from Content-Disposition
-    const disposition = res.headers["content-disposition"];
-    const match = disposition?.match(/filename\*?=(?:UTF-8'')?["']?([^"';]+)/i);
-    const filename = match ? decodeURIComponent(match[1]) : `track-${job_id}.mp3`;
-
-    // Create a blob URL and trigger download
-    const url = URL.createObjectURL(res.data);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  };
 
   return (
     <>
@@ -136,7 +116,7 @@ function Download() {
                   {item.status}
                   {item.status === "done" &&
                     <button className="ml-4 bg-green-300 text-white font-semibold px-2 py-1 rounded-4xl transition-all duration-150 active:scale-95"
-                      onClick={ () => handleDownload(item.job_id) }>
+                      onClick={ () => downloadData(item.job_id) }>
                       Download
                     </button>
                   }
