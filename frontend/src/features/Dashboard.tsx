@@ -4,6 +4,7 @@ import type { TrackData } from "@/types";
 import { getTopTracks, getTrackData } from "@/services/music.service";
 import Loading from "@/components/Loading";
 import { downloadNow } from "@/lib/lib";
+import { useDownload } from "@/hooks/Download";
 
 function Dashboard() {
   const [selected, setSelected] = useState<TrackData | null>(null);
@@ -16,6 +17,8 @@ function Dashboard() {
 
   const [tracks, setTracks] = useState<TrackData[]>([]);
   const open = selected ? true : false;
+
+  const { addSong, jobs } = useDownload();
 
   // fetch top songs
   useEffect(() => {
@@ -106,6 +109,7 @@ function Dashboard() {
         />
         <button
           className="btn-animation bg-main px-4 py-2 rounded-full"
+          onClick={() => console.log(jobs)}
         >
           Search
         </button>
@@ -169,7 +173,7 @@ function Dashboard() {
             </div>
             <div className="flex justify-center items-center gap-4">
               <button className="bg-main p-2 rounded-md w-full btn-animation" onClick={() => downloadNow(selected.id)}>Download now</button>
-              <button className="bg-main p-2 rounded-md w-full btn-animation">Add to Downloads</button>
+              <button className="bg-main p-2 rounded-md w-full btn-animation" onClick={() => addSong(selected)}>Add to Downloads</button>
             </div>
           </div>
         </Modal>
