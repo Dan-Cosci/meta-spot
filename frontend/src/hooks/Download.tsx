@@ -1,3 +1,5 @@
+import { downloadData } from "@/lib/lib";
+import { checkStatus, createJob } from "@/services/process.service";
 import type { jobModel, jobStatusModel, TrackData } from "@/types"
 import { createContext, useContext, useState, type ReactNode } from "react";
 type Job = {
@@ -17,13 +19,48 @@ type DownloadContextValue = {
 
 const downloadContext = createContext<DownloadContextValue>(null)
 
+const formatSong = (job: Job) => { return `${job.name} ${job.artist}` }
+
 export function DownloadProvider({ children }: { children: ReactNode }) {
 
   const [jobs, setJobs] = useState<Job[]>([]);
-  const startDownload = () => {
+
+
+  const startDownload = async () => {
+    let created: Job[] = [];
     for (const job of jobs) {
-      console.log(job);
+      const res = await createJob(formatSong(job));
+      const updated = { ...job, job_id: res.job_id }
+      created.push(updated);
+
+      setJobs((prev) => prev.map((j) =>
+        j.song_id === job.song_id ? { ...j, job_id: res.job_id } : j
+      ));
     }
+
+    while (true) {
+
+      let checked = 0
+      for (const job of created) {
+        if (job.status === "done") continue;
+        if (job.status === "failed") continue;
+
+        const res = await checkStatus(job.job_id);
+        job.status = res.status;
+        setJobs((prev) => prev.map((j) =>
+          j.job_id === job.job_id? { ...j, status: res.status } : j
+        ));
+
+        checked += 1;
+      }
+
+      if (checked ===0 ) break
+
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+
+    for (const job of created) { downloadData(job.job_id) }
+
   }
 
   const addJob = (job: jobModel) => { }

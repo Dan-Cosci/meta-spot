@@ -1,133 +1,151 @@
-import { useEffect, useState, type SubmitEvent } from "react";
-import toast from "react-hot-toast";
-import instance from "../services/api.service"; import axios from "axios";
-import { downloadData } from "@/lib/lib"
+// pages/Downloads.tsx
+import { useDownload } from "@/hooks/Download";
 
-import { type Que } from "@/types";
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Queued",
+  processing: "Downloading",
+  done: "Ready",
+  failed: "Failed",
+};
 
-function Download() {
+export default function Downloads() {
+  const { jobs, startDownload } = useDownload();
 
-  const [query, setQuery] = useState<string>("");
-  const [que, setQue] = useState<Que[]>();
-
-  useEffect(() => {
-    console.log(que)
-    const interval = setInterval(async () => {
-
-      // skips 1st run
-      if (!que) return;
-
-      for (const item of que) {
-        if (item.status === "done") continue;
-        if (item.status === "failed") continue;
-
-        try {
-          const res = await instance.get(`/status/${item.job_id}`, {});
-          setQue((prev) => (prev ?? []).map((q) =>
-            q.job_id == item.job_id ? {...q, status: res.data.status}: q
-          ));
-
-        } catch (err) {
-          if (axios.isAxiosError(err) && err.response?.status === 404) {
-            setQue((prev) => (prev ?? []).filter((q) => q.job_id !== item.job_id));
-          }
-
-        }
-      }
-
-    }, 2000);
-
-    return () => clearInterval(interval)
-  }, [que]);
-
-  const handleInsert = async (e: SubmitEvent) => {
-    e.preventDefault();
-    if (query === "") {
-      toast.error("You can't submit blank");
-      return;
-    }
-
-    const song = query;
-    const res = await instance.post("/job", { song: song });
-    const data = res.data.data;
-    setQue((prev) => [...(prev ?? []), { query: song, status: "pending", job_id:data.job_id}]);
-    setQuery("");
-
-  }
-
+  const active = jobs.filter((j) => j.status === "pending" || j.status === "processing");
+  const finished = jobs.filter((j) => j.status === "done" || j.status === "failed");
 
   return (
-    <>
-      <h1 className="text-3xl font-bold">Own your <span className="text-main">music</span>, Listen without the <span className="text-main">subscription</span></h1>
-      <form onSubmit={handleInsert} className="flex max-md:flex-col p-8 md:items-center items-end">
-        <input
-          type="text"
-          name="song"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Song name - artist name..."
-          className="bg-background border border-main rounded-4xl focus:outline-none max-md:w-[80vw] w-[50vw] text-xl px-8 py-3 max-md:mb-4"
-        />
-        <button type="submit" className="bg-transparent w-32 h-10  max-md:ml-0 ml-5 rounded-4xl text-main border-2 border-main">
-          add to que
+    <div className="w-full max-w-4xl text-left">
+      {/* Header */}
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
+            Downloads
+          </h1>
+          <p className="mt-1 text-sm text-text-muted">
+            {jobs.length === 0
+              ? "Nothing in progress"
+              : `${active.length} in progress · ${finished.length} finished`}
+          </p>
+        </div>
+
+        <button
+          onClick={startDownload}
+          disabled={active.length === 0}
+          className="btn-animation rounded-xl bg-main px-5 py-2.5 text-sm font-medium text-background disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Download all
         </button>
-      </form>
+      </header>
 
-      {que && (
-        <section className="w-full max-w-2xl flex flex-col gap-3">
-          {/* Header */}
-          <div className="flex flex-row justify-between items-center">
-            <h2 className="text-sm font-semibold text-neutral-400 uppercase tracking-wider">
-              Queue
-            </h2>
-            <span className="text-sm text-neutral-500">{que.length} songs</span>
-          </div>
-
-          {/* Items */}
-          <div className="flex flex-col gap-2">
-            {que.map((item, i) => (
-              <div
-                key={i}
-                className="flex flex-row items-center justify-between
-                          px-4 py-3 rounded-lg border border-neutral-800
-                          bg-background"
-              >
-                {/* Left: status icon */}
-                <div className="flex flex-row items-center gap-3">
-                  {item.status === "done" && <span className="text-green-400">✓</span>}
-                  {item.status === "pending" && <span className="text-amber-300 animate-pulse">·</span>}
-                  {item.status === "failed" && <span className="text-red-400">✕</span>}
-
-                  <span className="truncate max-w-[40ch]">{item.query}</span>
-                </div>
-
-                {/* Right: status label */}
-                <span
-                  className={`text-xs shrink-0 ml-3 ${
-                    item.status === "done" ? "text-green-400"
-                    : item.status === "pending" ? "text-amber-300"
-                    : item.status === "failed" ? "text-red-400"
-                    : "text-neutral-500"
-                  }`}
-                >
-                  {item.status === "pending" &&
-                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-amber-300 border-t-transparent inline-block mr-2"></div>
-                  }
-                  {item.status}
-                  {item.status === "done" &&
-                    <button className="ml-4 bg-green-300 text-white font-semibold px-2 py-1 rounded-4xl transition-all duration-150 active:scale-95"
-                      onClick={ () => downloadData(item.job_id) }>
-                      Download
-                    </button>
-                  }
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
+      {/* Empty state */}
+      {jobs.length === 0 && (
+        <div className="rounded-2xl border border-highlight/50 bg-highlight/20 p-12 text-center">
+          <p className="text-lg font-medium">No downloads yet</p>
+          <p className="mt-1 text-sm text-text-muted">
+            Tracks you start downloading will show up here.
+          </p>
+        </div>
       )}
-    </>
+
+      {/* Active */}
+      {active.length > 0 && (
+        <Section title="In progress">
+          <ul className="divide-y divide-highlight/40 overflow-hidden rounded-2xl border border-highlight/40 bg-highlight/20">
+            {active.map((job) => (
+              <Row key={job.song_id}>
+                <StatusDot status={job.status} />
+                <TrackInfo name={job.name} artist={job.artist} />
+                <StatusChip status={job.status} />
+              </Row>
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      {/* Finished */}
+      {finished.length > 0 && (
+        <Section title="History">
+          <ul className="divide-y divide-highlight/40 overflow-hidden rounded-2xl border border-highlight/40 bg-highlight/20">
+            {finished.map((job) => (
+              <Row key={job.song_id}>
+                <StatusDot status={job.status} />
+                <TrackInfo name={job.name} artist={job.artist} />
+                <StatusChip status={job.status} />
+
+                {job.status === "done" && (
+                  <button className="btn-animation rounded-lg bg-main px-3 py-1.5 text-xs font-medium text-background">
+                    Save
+                  </button>
+                )}
+                {job.status === "failed" && (
+                  <button className="btn-animation rounded-lg border border-highlight px-3 py-1.5 text-xs font-medium text-text-main hover:bg-card-hover">
+                    Retry
+                  </button>
+                )}
+              </Row>
+            ))}
+          </ul>
+        </Section>
+      )}
+    </div>
   );
 }
 
-export default Download;
+/* ---- pieces ---- */
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="mb-8">
+      <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-text-muted">
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+function Row({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-card-hover/40">
+      {children}
+    </li>
+  );
+}
+
+function TrackInfo({ name, artist }: { name: string; artist: string }) {
+  return (
+    <div className="min-w-0 flex-1">
+      <p className="truncate font-medium">{name}</p>
+      <p className="truncate text-sm text-text-muted">{artist}</p>
+    </div>
+  );
+}
+
+function StatusDot({ status }: { status: string }) {
+  const color =
+    status === "done"
+      ? "bg-main"
+      : status === "failed"
+      ? "bg-red-500"
+      : status === "processing"
+      ? "bg-main animate-pulse"
+      : "bg-text-muted";
+
+  return <span className={`h-2 w-2 shrink-0 rounded-full ${color}`} />;
+}
+
+function StatusChip({ status }: { status: string }) {
+  const styles: Record<string, string> = {
+    pending: "bg-highlight text-text-muted",
+    processing: "bg-main/20 text-main",
+    done: "bg-main/20 text-main",
+    failed: "bg-red-500/15 text-red-400",
+  };
+
+  return (
+    <span className={`rounded-full px-3 py-1 text-xs font-medium ${styles[status] ?? styles.pending}`}>
+      {STATUS_LABEL[status] ?? status}
+    </span>
+  );
+}
