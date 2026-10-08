@@ -27,10 +27,10 @@ function Dashboard() {
 
   const [tracks, setTracks] = useState<TrackData[]>([]);
   const [search, setSearch] = useState<string>("");
-  const [searchResult, setSearchResult] = useState<TrackData[]| null>(null);
+  const [searchResult, setSearchResult] = useState<TrackData[]| undefined>(undefined);
   const open = selected !== null;
 
-  const { addSong, jobs } = useDownload();
+  const { addSong } = useDownload();
 
   useEffect(() => {
     let cancelled = false;
@@ -151,7 +151,7 @@ function Dashboard() {
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-text-muted">
               Popular now
             </h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none [&::-webkit-scrollbar]:hidden">
               {tracks.map((el) => (
                 <button
                   key={el.id}
@@ -201,7 +201,7 @@ function Dashboard() {
       {/* Player modal */}
       {selected && (
         <Modal open={open} onClose={onClose}>
-          <div className="mx-4 flex w-[calc(100vw-2rem)] max-w-md flex-col gap-5 rounded-2xl border border-highlight bg-background p-5 shadow-xl md:mx-0 md:w-[28rem]">
+          <div className="mx-4 flex w-[calc(100vw-2rem)] max-w-md flex-col gap-5 rounded-2xl border border-highlight bg-background p-5 shadow-xl md:mx-0 md:w-md">
             {/* Track header */}
             <div className="flex items-start gap-4">
               <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl">
