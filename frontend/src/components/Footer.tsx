@@ -1,6 +1,9 @@
-import Logo from "../assets/meta-spot-logo.svg"
+import { DarkThemeLogo, LightThemeLogo } from "@/config/constant";
+import { useTheme } from "@/hooks/Theme";
 
 export default function Footer() {
+  const { theme } = useTheme()
+
   return (
     <footer className="bg-neutral-950 border-t border-neutral-800">
       <div className="max-md:px-4 md:px-[10vw] py-10">
@@ -10,7 +13,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="flex flex-col gap-3">
             <div className="flex flex-row items-center gap-2">
-              <img src={Logo} alt="meta spot logo" className="w-8" />
+              <img src={theme == "light" ? LightThemeLogo : DarkThemeLogo} alt="meta spot logo" className="w-8" />
               <span className="font-bold text-white">Meta-spot</span>
             </div>
             <p className="text-sm text-neutral-500">
@@ -24,9 +27,9 @@ export default function Footer() {
               Product
             </h3>
             {/* TODO: add real hrefs */}
-            <a href="#" className="text-sm text-neutral-500 hover:text-green-300 transition-colors">Home</a>
-            <a href="#" className="text-sm text-neutral-500 hover:text-green-300 transition-colors">How it works</a>
-            <a href="#" className="text-sm text-neutral-500 hover:text-green-300 transition-colors">Changelog</a>
+            <a href="#" className="text-sm text-neutral-500 hover:text-main transition-colors">Home</a>
+            <a href="#" className="text-sm text-neutral-500 hover:text-main transition-colors">How it works</a>
+            <a href="#" className="text-sm text-neutral-500 hover:text-main transition-colors">Changelog</a>
             {/* TODO: add pricing/features links if applicable */}
           </div>
 
@@ -36,9 +39,9 @@ export default function Footer() {
               Legal
             </h3>
             {/* TODO: add real hrefs */}
-            <a href="#" className="text-sm text-neutral-500 hover:text-green-300 transition-colors">Terms of Service</a>
-            <a href="#" className="text-sm text-neutral-500 hover:text-green-300 transition-colors">Privacy Policy</a>
-            <a href="#" className="text-sm text-neutral-500 hover:text-green-300 transition-colors">Disclaimer</a>
+            <a href="#" className="text-sm text-neutral-500 hover:text-main transition-colors">Terms of Service</a>
+            <a href="#" className="text-sm text-neutral-500 hover:text-main transition-colors">Privacy Policy</a>
+            <a href="#" className="text-sm text-neutral-500 hover:text-main transition-colors">Disclaimer</a>
           </div>
 
           {/* Socials */}
@@ -47,9 +50,9 @@ export default function Footer() {
               Connect
             </h3>
             {/* TODO: add real social links */}
-            <a href="#" className="text-sm text-neutral-500 hover:text-green-300 transition-colors">GitHub</a>
-            <a href="#" className="text-sm text-neutral-500 hover:text-green-300 transition-colors">X / Twitter</a>
-            <a href="#" className="text-sm text-neutral-500 hover:text-green-300 transition-colors">Discord</a>
+            <a href="#" className="text-sm text-neutral-500 hover:text-main transition-colors">GitHub</a>
+            <a href="#" className="text-sm text-neutral-500 hover:text-main transition-colors">X / Twitter</a>
+            <a href="#" className="text-sm text-neutral-500 hover:text-main transition-colors">Discord</a>
             {/* TODO: add more socials (YouTube, Bluesky, etc.) */}
           </div>
         </div>
@@ -60,7 +63,7 @@ export default function Footer() {
             © {new Date().getFullYear()} Meta-spot. For personal use.
           </p>
           {/* TODO: replace with your GitHub repo link */}
-          <a href="#" className="text-xs text-neutral-600 hover:text-green-300 transition-colors">
+          <a href="#" className="text-xs text-neutral-600 hover:text-main transition-colors">
             Open source on GitHub
           </a>
         </div>

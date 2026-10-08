@@ -7,7 +7,7 @@ export interface TrackResponse {
 export interface SearchResponse {
   success: boolean;
   message: string;
-  data: ArtistData | null;
+  data: SearchData | null;
 }
 
 export interface PlaylistResponse {
@@ -71,4 +71,11 @@ export interface Album {
   uri: string;
   name: string;
   images: Image[];
+}
+
+
+export interface SearchData {
+  query: string
+  tracks: TrackData[]
+  artists: ArtistData[]
 }

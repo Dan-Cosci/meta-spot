@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Modal from "@/components/Modal";
 import type { TrackData } from "@/types";
-import { getTopTracks, getTrackData } from "@/services/music.service";
+import { getTopTracks, getTrackData, searchApi } from "@/services/music.service";
 import Loading from "@/components/Loading";
 import { useDownload } from "@/hooks/Download";
 
@@ -26,6 +26,8 @@ function Dashboard() {
   const [duration, setDuration] = useState(0);
 
   const [tracks, setTracks] = useState<TrackData[]>([]);
+  const [search, setSearch] = useState<string>("");
+  const [searchResult, setSearchResult] = useState<TrackData[]| null>(null);
   const open = selected !== null;
 
   const { addSong, jobs } = useDownload();
@@ -109,6 +111,15 @@ function Dashboard() {
 
   const hasPreview = Boolean(selected?.preview_url);
 
+  const handleSearch = async () => {
+    setLoading(prev => !prev);
+    const data = await searchApi(search);
+    setLoading(prev => !prev);
+    setSearchResult(data?.tracks);
+  }
+
+
+
   return (
     <>
       <audio ref={audioRef} />
@@ -119,9 +130,11 @@ function Dashboard() {
           type="text"
           placeholder="Search tracks…"
           className="w-full rounded-full border-2 border-highlight bg-transparent px-5 py-2.5 text-text-main outline-none transition-colors placeholder:text-text-muted focus:border-main"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
         <button
-          onClick={() => console.log(jobs)}
+          onClick={() => handleSearch()}
           className="btn-animation shrink-0 rounded-full bg-main px-6 py-2.5 text-sm font-medium text-background"
         >
           Search
@@ -132,6 +145,7 @@ function Dashboard() {
         <Loading />
       ) : (
         <div className="w-full max-w-6xl text-left">
+
           {/* Popular — horizontal scroll */}
           <section className="mt-10">
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-text-muted">
@@ -142,7 +156,7 @@ function Dashboard() {
                 <button
                   key={el.id}
                   onClick={() => handleClick(el)}
-                  className="flex w-72 shrink-0 items-center gap-4 rounded-2xl bg-highlight/20 p-3 text-left transition-colors hover:bg-card-hover"
+                  className="flex w-72 shrink-0 items-center gap-4 rounded-2xl p-2 text-left transition-colors hover:bg-card-hover"
                 >
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl">
                     <img src={el.images[2].url} alt="" className="h-full w-full object-cover" />
@@ -162,7 +176,7 @@ function Dashboard() {
               All tracks
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {tracks.map((el) => (
+              {(searchResult ? searchResult : tracks).map((el) => (
                 <button
                   key={el.id}
                   onClick={() => handleClick(el)}

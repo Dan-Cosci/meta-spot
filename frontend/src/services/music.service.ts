@@ -1,4 +1,4 @@
-import type { PlaylistResponse, TrackData, TrackResponse } from "@/types";
+import type { PlaylistResponse, SearchResponse, TrackData, TrackResponse } from "@/types";
 import instance from "./api.service";
 
 const api = instance;
@@ -12,5 +12,9 @@ export const getTopTracks = async (): Promise<TrackData[] | []> => {
   const res = await api.get<PlaylistResponse>("/music");
   const tracks = (res.data.data?.tracks ?? []).map((i)=> i.track);
   return tracks;
+}
 
+export const searchApi = async (q:string) => {
+  const res = await api.get<SearchResponse>(`/music/search?q=${q}`);
+  return res.data.data;
 }

@@ -15,8 +15,11 @@ export default function Navbar() {
         <h2 className="font-bold max-md:text-2xl text-2xl">Meta-spot</h2>
       </div>
       <div className="flex flex-row justify-between items-center gap-5">
-        <p className="text-2xl " onClick={() => toggleTheme()}>{theme === "dark" ? <IoSunny />: <IoMoon/> }</p>
-        <p className="text-lg hover:text-green-300"><Link to={location.pathname === "/" ? "/downloads" : "/"}>{ location.pathname == "/"? "Downloads" : "Home"}</Link></p>
+        <p
+          className="text-2xl rounded-full p-1 hover:bg-main/20 btn-animation transition-colors duration-75"
+          onClick={() => toggleTheme()}>{theme === "dark" ? <IoSunny /> : <IoMoon />}
+        </p>
+        <p className="text-lg hover:text-main"><Link to={location.pathname === "/" ? "/downloads" : "/"}>{ location.pathname == "/"? "Downloads" : "Home"}</Link></p>
       </div>
     </nav>
   );

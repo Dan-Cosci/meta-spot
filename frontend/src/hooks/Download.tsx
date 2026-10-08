@@ -13,7 +13,6 @@ type Job = {
 type DownloadContextValue = {
   jobs: Job[]
   startDownload: () => void
-  addJob: (job: jobModel) => void
   addSong: (song: TrackData) => void
 }
 
@@ -27,7 +26,7 @@ export function DownloadProvider({ children }: { children: ReactNode }) {
 
 
   const startDownload = async () => {
-    let created: Job[] = [];
+    const created: Job[] = [];
     for (const job of jobs) {
       const res = await createJob(formatSong(job));
       const updated = { ...job, job_id: res.job_id }
@@ -44,6 +43,7 @@ export function DownloadProvider({ children }: { children: ReactNode }) {
       for (const job of created) {
         if (job.status === "done") continue;
         if (job.status === "failed") continue;
+        if (!job.job_id) continue;
 
         const res = await checkStatus(job.job_id);
         job.status = res.status;
@@ -59,19 +59,19 @@ export function DownloadProvider({ children }: { children: ReactNode }) {
       await new Promise((r) => setTimeout(r, 1000));
     }
 
-    for (const job of created) { downloadData(job.job_id) }
+    for (const job of created) {
+      if (!job.job_id) continue;
+      downloadData(job.job_id);
+    }
 
   }
 
-  const addJob = (job: jobModel) => { }
   const addSong = (song: TrackData) => setJobs((prev) => ([...prev ?? [], {
    job_id: null, song_id: song.id, name: song.name, artist: song.artists[0].name, status: "pending"
   }]));
-  const updateStatus = (job: jobStatusModel) => { }
-
 
   return (
-    <downloadContext.Provider value={{startDownload, jobs, addJob, addSong}}>
+    <downloadContext.Provider value={{startDownload, jobs, addSong}}>
       { children }
     </downloadContext.Provider>
   )
